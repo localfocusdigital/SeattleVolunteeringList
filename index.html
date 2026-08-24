@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volunteer Puget Sound — Find Volunteer Opportunities Near You</title>
+<meta name="description" content="A friendly directory of 180+ nonprofits and community organizations across Seattle, the Eastside, South King County, and Snohomish County that need volunteers. Filter by city and cause.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌲</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#fbf7ee; --card:#ffffff; --ink:#17334a; --muted:#5a7086;
+  --green:#20694f; --green-dark:#153f32; --salmon:#ff6f54; --salmon-dark:#e85a40;
+  --sky1:#ffe9d4; --sky2:#c4e1f0; --line:#eadfce;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Nunito Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--cream);color:var(--ink);line-height:1.6;font-size:16px}
+a{color:var(--green)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+header.hero{background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 55%,#a5d3e8 100%);padding:64px 0 0;text-align:center;position:relative;overflow:hidden}
+header.hero .sun-clouds{position:absolute;inset:0;pointer-events:none}
+header.hero h1{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:clamp(2.3rem,6vw,3.6rem);letter-spacing:-.01em;color:var(--ink)}
+header.hero h1 em{font-style:normal;color:var(--green)}
+header.hero p.tag{max-width:660px;margin:14px auto 26px;font-size:clamp(1rem,2.2vw,1.18rem);color:#38566e;font-weight:600}
+.stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:34px}
+.stats b{background:rgba(255,255,255,.75);border:1.5px solid rgba(255,255,255,.9);color:var(--ink);padding:7px 18px;border-radius:999px;font-weight:800;font-size:.88rem;box-shadow:0 2px 8px rgba(23,51,74,.08)}
+.scene{display:block;width:100%;height:clamp(130px,22vw,270px);margin-top:auto}
+
+.controls{margin-top:-58px;position:sticky;top:12px;z-index:50}
+.toolbar{background:var(--card);border-radius:22px;border:1.5px solid var(--line);box-shadow:0 10px 34px rgba(23,51,74,.13);padding:18px;display:flex;flex-direction:column;gap:13px}
+.row1{display:flex;gap:10px;flex-wrap:wrap}
+.search-wrap{flex:1 1 260px;position:relative}
+.search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--muted)}
+#q{width:100%;padding:12px 14px 12px 40px;border:1.5px solid var(--line);border-radius:999px;font-size:.96rem;background:var(--cream);color:var(--ink);font-family:inherit}
+#q:focus,#loc:focus,#surprise:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(32,105,79,.15)}
+select{padding:12px 36px 12px 16px;border:1.5px solid var(--line);border-radius:999px;font-size:.94rem;background:var(--cream) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235a7086' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 15px center;color:var(--ink);appearance:none;-webkit-appearance:none;cursor:pointer;font-family:inherit;font-weight:600}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;font-size:.82rem;font-weight:800;color:var(--muted);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:7px;font-family:inherit}
+.chip .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.chip:hover{border-color:var(--green);color:var(--ink)}
+.chip.active{background:var(--green);border-color:var(--green);color:#fff}
+.meta-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:0 4px}
+#count{font-size:.86rem;color:var(--muted);font-weight:700}
+.actions{display:flex;gap:4px}
+.clear-btn,.surprise-btn{font-size:.82rem;font-weight:800;background:none;border:none;cursor:pointer;padding:5px 10px;border-radius:999px;font-family:inherit}
+.clear-btn{color:var(--muted)}
+.surprise-btn{color:var(--salmon-dark)}
+.clear-btn:hover{text-decoration:underline}
+.surprise-btn:hover{background:#fff0ec}
+
+main{padding:34px 0 80px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:20px}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:11px;box-shadow:0 2px 6px rgba(23,51,74,.05);transition:transform .18s,box-shadow .18s}
+.card:hover{transform:translateY(-4px) rotate(-.3deg);box-shadow:0 14px 30px rgba(23,51,74,.12)}
+.card h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:1.18rem;line-height:1.35;letter-spacing:.005em}
+.card h2 a{color:var(--ink);text-decoration:none}
+.card h2 a:hover{color:var(--green)}
+.card p{font-size:.9rem;color:var(--muted);flex:1}
+.badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto}
+.pill{font-size:.72rem;font-weight:800;padding:4px 12px;border-radius:999px;letter-spacing:.02em}
+.pill.loc{background:#edf3f7;color:#476579}
+.go{margin-top:14px;align-self:flex-start;font-size:.88rem;font-weight:800;color:#fff;background:var(--salmon);padding:10px 20px;border-radius:999px;text-decoration:none;transition:all .15s;box-shadow:0 3px 0 var(--salmon-dark)}
+.go:hover{background:var(--salmon-dark);transform:translateY(1px);box-shadow:0 2px 0 #c74b33}
+@keyframes flashcard{0%,100%{box-shadow:0 2px 6px rgba(23,51,74,.05)}50%{box-shadow:0 0 0 5px rgba(255,111,84,.35)}}
+.card.flash{animation:flashcard 1.2s ease 2}
+
+.empty{display:none;text-align:center;padding:70px 20px;color:var(--muted)}
+.empty svg{width:110px;height:auto;margin-bottom:14px;opacity:.85}
+.empty b{font-family:Fraunces,Georgia,serif;font-size:1.35rem;display:block;margin-bottom:8px;color:var(--ink)}
+
+.divider{display:block;width:100%;height:70px;margin-bottom:-1px}
+footer{background:var(--green-dark);color:#cfe2d7;padding:44px 0 50px;font-size:.9rem}
+footer .cols{display:flex;gap:44px;flex-wrap:wrap;justify-content:space-between}
+footer h3{font-family:Fraunces,Georgia,serif;font-size:1.06rem;color:#fff;margin-bottom:10px;font-weight:600}
+footer ul{list-style:none}
+footer li{margin-bottom:5px}
+.note{margin-top:30px;padding-top:20px;border-top:1px dashed rgba(255,255,255,.25);font-size:.78rem;color:#9dbfae}
+
+@media(max-width:640px){
+  header.hero{padding-top:48px}
+  .row1 select{flex:1 1 100%}
+  .toolbar{padding:14px}
+  footer .cols{flex-direction:column;gap:26px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Volunteer <em>Puget Sound</em></h1>
+    <p class="tag">From Ballard to Bellevue to Burien — find a cause you love and lend a hand. Your neighbors are waiting.</p>
+    <div class="stats" id="stats"></div>
+  </div>
+  <svg class="scene" viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <path fill="#b7cede" d="M0,196 L140,140 L300,196 L430,158 L580,200 L1440,200 L1440,260 L0,260 Z"/>
+    <path fill="#9dbcd4" d="M180,260 L430,55 L690,260 Z"/>
+    <path fill="#ffffff" opacity=".95" d="M355,128 L430,55 L512,133 L488,116 L468,142 L442,112 L415,138 L390,114 L372,132 Z"/>
+    <path fill="#aac6db" d="M-40,260 L150,120 L360,260 Z"/>
+    <path fill="#ffffff" opacity=".85" d="M104,164 L150,120 L200,166 Z"/>
+    <path fill="#aac6db" d="M700,260 L880,150 L1060,260 Z"/>
+    <g fill="#31506b">
+      <rect x="952" y="196" width="34" height="66"/><rect x="992" y="178" width="26" height="84"/>
+      <rect x="1024" y="204" width="40" height="58"/><rect x="1070" y="186" width="24" height="76"/>
+      <rect x="1100" y="214" width="30" height="48"/><rect x="1136" y="170" width="22" height="92"/>
+      <rect x="1164" y="198" width="38" height="64"/><rect x="1208" y="182" width="26" height="80"/>
+      <rect x="1340" y="192" width="30" height="70"/><rect x="1376" y="176" width="26" height="86"/><rect x="1408" y="206" width="32" height="56"/>
+      <path d="M1276,260 L1289,150 L1293,150 L1306,260 Z"/>
+      <rect x="1266" y="136" width="60" height="16" rx="8"/><rect x="1276" y="126" width="40" height="10" rx="5"/><rect x="1290" y="96" width="4" height="34" rx="2"/>
+    </g>
+    <path id="trees" fill="#1d5c45" d=""/>
+    <path fill="#2f89a5" d="M0,232 C120,214 240,250 360,236 C480,222 600,252 720,238 C840,224 960,252 1080,238 C1200,224 1320,250 1440,236 L1440,260 L0,260 Z"/>
+    <path fill="#57a7bd" opacity=".55" d="M0,242 C160,228 320,258 480,246 C640,234 800,260 960,248 C1120,236 1280,258 1440,246 L1440,260 L0,260 Z"/>
+  </svg>
+</header>
+
+<div class="controls">
+  <div class="wrap"><div class="toolbar">
+    <div class="row1">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="search" id="q" placeholder="Search — try “food bank”, “trail crew”, or your neighborhood…" aria-label="Search organizations">
+      </div>
+      <label for="loc" style="position:absolute;left:-9999px">Location</label>
+      <select id="loc"></select>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Filter by cause"></div>
+    <div class="meta-row">
+      <span id="count" aria-live="polite"></span>
+      <span class="actions">
+        <button class="surprise-btn" id="surprise">Surprise me!</button>
+        <button class="clear-btn" id="clear">Clear filters</button>
+      </span>
+    </div>
+  </div></div>
+</div>
+
+<main class="wrap">
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty">
+    <svg viewBox="0 0 120 80" aria-hidden="true"><g fill="#9fc4da"><ellipse cx="45" cy="30" rx="28" ry="18"/><ellipse cx="75" cy="24" rx="22" ry="15"/><ellipse cx="62" cy="38" rx="30" ry="16"/></g><g stroke="#57a7bd" stroke-width="3" stroke-linecap="round"><line x1="35" y1="52" x2="31" y2="66"/><line x1="55" y1="54" x2="51" y2="68"/><line x1="75" y1="52" x2="71" y2="66"/><line x1="92" y1="54" x2="88" y2="68"/></g></svg>
+    <b>Nothing here but drizzle…</b>
+    Try a different search term, or clear the filters to browse everything.
+  </div>
+</main>
+
+<svg class="divider" viewBox="0 0 1440 70" preserveAspectRatio="none" aria-hidden="true"><path fill="#153f32" d="M0,42 C240,8 480,64 720,38 C960,12 1200,58 1440,30 L1440,70 L0,70 Z"/></svg>
+<footer><div class="wrap">
+  <div class="cols">
+    <div style="max-width:400px">
+      <h3>About this directory</h3>
+      <p>A community-built guide to volunteering across the greater Seattle / Puget Sound region — from Ballard food banks to Chinatown-ID heritage centers to Issaquah trail crews.</p>
+    </div>
+    <div>
+      <h3>Before you go</h3>
+      <ul>
+        <li>Opportunities change weekly — always confirm on the organization's page.</li>
+        <li>Many roles require an orientation or background check.</li>
+        <li>Youth under 18: look for family/youth-friendly shifts (zoos, museums, parks).</li>
+        <li>Groups of 5+ should email volunteer coordinators directly.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Browse by area</h3>
+      <ul>
+        <li>Seattle · Chinatown-ID · Rainier Valley</li>
+        <li>Bellevue · Kirkland · Redmond · Woodinville</li>
+        <li>Renton · Tukwila · Kent · Auburn · Burien</li>
+        <li>Issaquah · Sammamish · Snoqualmie Valley</li>
+        <li>Lynnwood · Everett · Snohomish County</li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">Listings last reviewed August 2026. Links point to each organization's own volunteer page so details stay current. This is an independent community resource and is not affiliated with any listed organization.</p>
+</div></footer>
+
+<script>
+const CAUSES={
+food:["Food Security","#c2570f"],
+housing:["Housing & Homelessness","#4f46b8"],
+human:["Human Services","#8a4bab"],
+youth:["Youth & Education","#1d6fc2"],
+seniors:["Seniors","#7a3fa0"],
+health:["Health & Crisis Support","#bb3050"],
+arts:["Arts, Culture & Museums","#b03080"],
+refugees:["Refugees & Immigrants","#0d7d8c"],
+culture:["Culture & Heritage","#a16207"],
+animals:["Animals","#9a6418"],
+environment:["Environment & Outdoors","#2e7d32"]
+};
+const LOCS={
+regional:["Region-wide / Multiple cities","Everywhere"],
+seattle:["Seattle","Seattle"],
+bellevue:["Bellevue","Eastside"],kirkland:["Kirkland","Eastside"],redmond:["Redmond","Eastside"],
+woodinville:["Woodinville","Eastside"],bothell:["Bothell","Eastside"],mercerisland:["Mercer Island","Eastside"],
+sammamish:["Sammamish","Eastside"],issaquah:["Issaquah","Eastside"],
+duvall:["Duvall / Carnation","Snoqualmie Valley"],northbend:["North Bend / Snoqualmie","Snoqualmie Valley"],
+renton:["Renton","South King County"],tukwila:["Tukwila","South King County"],kent:["Kent","South King County"],
+auburn:["Auburn","South King County"],burien:["Burien","South King County"],seatac:["SeaTac","South King County"],
+desmoines:["Des Moines","South King County"],federalway:["Federal Way","South King County"],
+everett:["Everett / Mukilteo","Snohomish County"],lynnwood:["Lynnwood","Snohomish County"],sultan:["Sultan","Snohomish County"],
+whidbey:["Whidbey Island","Other"]
+};
+const ORGS=[{n:"Acres of Diamonds",l:"duvall",c:["housing"],d:"Volunteers support team members, skilled projects, facility maintenance and administration for homeless families at this Duvall transition community.",u:"https://www.acresofdiamonds.org/volunteer/"},
+{n:"Afghan Health Initiative",l:"tukwila",c:["refugees","health"],d:"Community volunteers support case-management navigation, food assistance, and health and wellness workshops for Afghan newcomers.",u:"https://afghanhealth.org/home"},
+{n:"Atlantic Street Center",l:"seattle",c:["human","youth"],d:"Chaperone youth activities, cater support-group meals, facilitate workshops, and help at Juneteenth and Back-to-School events in the Central District and Rainier Valley.",u:"https://atlanticstreetcenter.org/support-us/volunteer/"},
+{n:"Attain Housing",l:"kirkland",c:["housing"],d:"Provide meals, childcare, tutoring and event support for homeless and at-risk families in transitional apartments.",u:"http://www.attainhousing.org"},
+{n:"Auburn Food Bank",l:"auburn",c:["food"],d:"Work distribution shifts Monday–Friday plus holiday meal events serving over 1,000 families.",u:"https://www.theauburnfoodbank.org/volunteer"},
+{n:"Auburn Senior Activity Center",l:"auburn",c:["seniors"],d:"Pack food bags, deliver meals, order supplies and assist with center programs.",u:"https://www.auburnwa.gov/city_hall/parks_arts_recreation/senior_activity_center"},
+{n:"Ballard Food Bank",l:"seattle",c:["food"],d:"Sort recovered groceries, stock shelves, pack home-delivery bags, and help clients shop.",u:"https://www.ballardfoodbank.org/volunteer"},
+{n:"Bellevue Arts Museum",l:"bellevue",c:["arts"],d:"Serve as docents, help with archival projects, public programs and Bellevue Arts Fair Weekend.",u:"https://www.bellevuearts.org/volunteer"},
+{n:"Bellevue LifeSpring",l:"bellevue",c:["human"],d:"Assemble Breaktime-Mealtime food boxes, support Clothes-4-Kids and Holiday Adopt-A-Family, and staff the thrift store for Bellevue School District families.",u:"https://www.bellevuelifespring.org/"},
+{n:"Bellevue Network on Aging",l:"bellevue",c:["seniors"],d:"Volunteer board members advocate for older adults, organize regional forums, and connect seniors to resources through this City of Bellevue advisory network.",u:"https://bellevuewa.gov/city-government/departments/city-clerks-office/boards-and-commissions/network-on-aging"},
+{n:"Big Brothers Big Sisters of Puget Sound",l:"regional",c:["youth"],d:"Adults are matched one-on-one with youth ages 7–18 for ongoing mentoring in community, site-based, and group programs.",u:"https://inspirebig.org/become-a-big/"},
+{n:"Bloodworks Northwest",l:"regional",c:["health"],d:"Greet blood donors, monitor post-donation recovery, staff canteens at mobile drives, and make appointment reminder calls at donor centers across the region.",u:"https://bloodworksnw.org/donate/volunteer"},
+{n:"Boys & Girls Clubs of Bellevue",l:"bellevue",c:["youth"],d:"Support club members through tutoring, coaching, teen leadership programs, summer camps and daily clubhouse activities.",u:"https://www.bgcbellevue.org/Get-Involved/Volunteer"},
+{n:"Boys & Girls Clubs of King County",l:"regional",c:["youth"],d:"Assist with homework help, athletics, tech skills and mentoring across 30+ clubhouses from Federal Way to north Seattle.",u:"https://positiveplace.org/volunteer-overview/"},
+{n:"Byrd Barr Place",l:"seattle",c:["food","human"],d:"Stock and distribute groceries at the Central District food bank, help at events, and support operations at the historic firehouse.",u:"https://byrdbarrplace.org/get-involved/volunteer"},
+{n:"Catholic Community Services of Western Washington",l:"regional",c:["human","seniors"],d:"Do chores and rides for seniors and people with disabilities, tutor youth, serve meals, and support shelters and day centers across King County.",u:"https://ccsww.org/get-involved/volunteer/"},
+{n:"City Fruit",l:"seattle",c:["environment","food"],d:"Prune, net and harvest surplus urban fruit from public orchards and backyard trees for delivery to 30+ local food banks.",u:"https://www.cityfruit.org/volunteer-opportunities/"},
+{n:"City of Bellevue Volunteers",l:"bellevue",c:["environment","arts"],d:"Steward parks and the Botanical Garden, coach youth sports, perform with Bellevue Youth Theatre, and serve on civic boards.",u:"https://bellevuewa.gov/volunteering"},
+{n:"City of Kirkland Volunteers",l:"kirkland",c:["environment","human"],d:"Restore natural areas with Green Kirkland, help at senior lunches and special events, and serve on boards and commissions.",u:"https://www.kirklandwa.gov/Government/City-Managers-Office/Volunteer-Opportunities"},
+{n:"City of Redmond Volunteers",l:"redmond",c:["environment","human"],d:"Join park stewardship, special events, senior programs, teen services and community-court roles across the city.",u:"https://www.redmond.gov/661/Volunteer-Opportunities"},
+{n:"City of Renton Volunteers",l:"renton",c:["human","environment"],d:"Support parks beautification, farmers market, River Days, youth sports, senior programs, storm-drain marking, and emergency management.",u:"https://www.rentonwa.gov/Activities-Events/Volunteer-Opportunities"},
+{n:"City of SeaTac Volunteer Program",l:"seatac",c:["human","environment"],d:"Assist at special events, park restorations, recycling events, the police front desk, and advisory committees.",u:"https://www.seatacwa.gov/services/volunteer-opportunities"},
+{n:"College Success Foundation",l:"bellevue",c:["youth"],d:"Serve as scholarship application readers each spring and support events for low-income, first-generation scholars.",u:"https://www.collegesuccessfoundation.org/get-involved/volunteer/"},
+{n:"Compass Housing Alliance",l:"seattle",c:["housing"],d:"Prepare and serve meals, help at the hygiene center, and support residents in shelters and supportive housing.",u:"https://www.compasshousingalliance.org/volunteer/"},
+{n:"Community Lunch on Capitol Hill",l:"seattle",c:["housing","food"],d:"Chop, cook, serve and clean up hot meals served five days a week to neighbors experiencing homelessness.",u:"https://www.communitylunch.org/volunteer"},
+{n:"Communities In Schools of Federal Way",l:"federalway",c:["youth"],d:"Mentors meet 45–60 minutes weekly with a student at their school to provide consistent adult support.",u:"https://federalway.ciswa.org/volunteer/"},
+{n:"Communities In Schools of Greater King County",l:"renton",c:["youth"],d:"Volunteer mentors support students in Renton and Tukwila school districts during the school day.",u:"https://gkc.ciswa.org/volunteer/"},
+{n:"Communities In Schools of South King County",l:"kent",c:["youth"],d:"Meet one-on-one weekly with students on the brink of success in Kent and Federal Way schools.",u:"https://skc.ciswa.org/volunteer/"},
+{n:"Crisis Connections",l:"seattle",c:["health"],d:"Trained volunteers answer crisis calls, texts and chats on 988, the WA Warm Line, and Teen Link, providing emotional support and resources.",u:"https://crisisconnections.org/get-involved/volunteer/"},
+{n:"DESC",l:"seattle",c:["housing","health"],d:"Commit to weekly six-month shifts supporting clients in crisis shelters and mental-health programs, plus meal prep and donation sorting.",u:"https://www.desc.org/get-involved/volunteer-at-desc/"},
+{n:"Duwamish Alive Coalition",l:"tukwila",c:["environment"],d:"Join twice-yearly multi-site river cleanups, kayak debris removals, and salmon habitat restoration from Auburn to Seattle.",u:"https://www.duwamishalive.org/"},
+{n:"Duwamish River Community Coalition",l:"seattle",c:["environment"],d:"Restore riverbank habitat, remove litter and invasives, and support community science and events along the Duwamish Superfund site in South Park and Georgetown.",u:"https://www.drcc.org/iwanttovolunteer"},
+{n:"EarthCorps",l:"seattle",c:["environment"],d:"Join work parties removing invasive plants, planting natives, and restoring shorelines, streams and parks throughout the Salish Sea region.",u:"http://www.earthcorps.org/volunteer"},
+{n:"El Centro de la Raza",l:"seattle",c:["human","refugees"],d:"Tutor kids, assist the food bank and early-learning programs, translate, and support events across 40+ human-service programs on Beacon Hill.",u:"https://www.elcentrodelaraza.org/get-involved/volunteer/"},
+{n:"Elizabeth Gregory Home",l:"seattle",c:["housing"],d:"Run day-shelter operations for women experiencing homelessness — serving meals, sorting donations, and scheduling showers and laundry.",u:"https://eghseattle.org/volunteer-opportunities/"},
+{n:"East African Community Services",l:"seattle",c:["refugees","youth"],d:"Support K–12 after-school programming and U.S. citizenship classes for East African immigrant and refugee families.",u:"https://www.eastafricancs.org/k-12-after-school-program/"},
+{n:"Eastside Friends of Seniors",l:"bellevue",c:["seniors"],d:"Drive seniors to medical appointments and help with shopping, errands, chores and friendly visits across the Eastside.",u:"http://eastsidefriendsofseniors.org/volunteer/"},
+{n:"Evergreen Mountain Bike Alliance",l:"regional",c:["environment"],d:"Build and maintain sustainable mountain-bike trails at Duthie Hill, Tiger Mountain, Colonnade and chapter work parties statewide.",u:"https://www.evergreenmtb.org/calendar/work-parties"},
+{n:"EvergreenHealth Hospital Volunteers",l:"kirkland",c:["health"],d:"Greet and way-find for guests, support clinical units, supply distribution and the gift shop on weekly shifts at the Eastside community hospital.",u:"https://www.evergreenhealth.com/about-us/volunteer/"},
+{n:"FareStart",l:"seattle",c:["food"],d:"Prep and package thousands of community meals in the kitchen and serve at Guest Chef Night events supporting culinary job training.",u:"https://www.farestart.org/volunteer/"},
+{n:"FamilyWorks",l:"seattle",c:["food"],d:"Sort produce, distribute food, unload trucks, run monthly food drives, and support home delivery at the Wallingford and Greenwood food banks.",u:"https://www.familyworksseattle.org/volunteer/"},
+{n:"Federal Way Community Gardens Foundation",l:"federalway",c:["environment","food"],d:"Tend organic community gardens whose harvest goes to neighbors in need while learning gardening skills.",u:"http://www.fwccn.org/community-gardens"},
+{n:"Federal Way Day Center (Catholic Community Services)",l:"federalway",c:["housing"],d:"Support a daytime hub offering adults experiencing homelessness showers, laundry, meals and connections to services.",u:"https://ccsww.org/get-help/shelter-homeless-services/federal-way-day-center/"},
+{n:"Federal Way Senior Center & South King County Food Bank",l:"federalway",c:["seniors","food"],d:"Drive food pickups, bag meals, staff the pantry and office, and help with senior meals and activities.",u:"https://federalwayseniorcenter.org/"},
+{n:"Fred Hutchinson Cancer Center",l:"seattle",c:["health"],d:"Patient and family volunteers comfort people waiting during treatment, support clinics, play healing music, and staff the patient pantry.",u:"https://www.fredhutch.org/en/ways-to-give/get-involved/volunteer/patient-family-volunteer.html"},
+{n:"Friends of the Issaquah Salmon Hatchery",l:"issaquah",c:["environment"],d:"Lead hatchery tours, deliver salmon education, and support operations and community events.",u:"https://www.issaquahfish.org/volunteer/"},
+{n:"Friends of Youth",l:"kirkland",c:["youth","housing"],d:"Mentor youth, support emergency shelter and transitional-living sites, donate meals and help at events for young people in crisis.",u:"https://www.friendsofyouth.org/support-us"},
+{n:"Full Life Care Care Teams",l:"federalway",c:["seniors"],d:"Provide respite for caregivers through yardwork, errands, companionship and household tasks.",u:"https://www.fulllifecare.org/services/care-teams/care-teams-volunteers"},
+{n:"FUSION Federal Way",l:"federalway",c:["housing"],d:"Prepare and maintain transitional housing units for homeless families working toward self-sufficiency.",u:"https://fusionfederalway.org/how-to-help/"},
+{n:"Forterra / Green City Partnerships",l:"regional",c:["environment"],d:"Restore forested neighborhood parks through 14 regional Green City partnerships logging 115,000+ volunteer hours annually.",u:"https://forterra.org/take-action/volunteer/"},
+{n:"Green Issaquah Partnership",l:"issaquah",c:["environment"],d:"Forest Stewards and helpers lead restoration of Issaquah's forested parks and open spaces.",u:"https://www.issaquahwa.gov/3041/Green-Issaquah"},
+{n:"Green Everett Partnership",l:"everett",c:["environment"],d:"Restore Everett's forested parks through invasive removal and native planting events.",u:"https://www.everettwa.gov/3196/Green-Everett"},
+{n:"Green Kirkland Partnership",l:"kirkland",c:["environment"],d:"Remove invasives and plant natives to restore Kirkland's forested parks at year-round work parties.",u:"https://www.kirklandwa.gov/Government/Departments/Parks-and-Community-Services/Green-Kirkland-Partnership"},
+{n:"Green Redmond Partnership",l:"redmond",c:["environment"],d:"Join forest-restoration work parties caring for Redmond's urban parks and natural areas.",u:"https://www.redmond.gov/2018/Green-Redmond"},
+{n:"Green SeaTac Partnership",l:"seatac",c:["environment"],d:"Restore urban forest in SeaTac parks through tree planting, weeding and mulching events like Green SeaTac Day.",u:"https://seatac.greencitypartnerships.org/event/map/"},
+{n:"Green Seattle Partnership",l:"seattle",c:["environment"],d:"Remove invasives and plant native trees in Seattle's forested parklands; trained Forest Stewards adopt and lead individual sites.",u:"https://greenseattle.org/get-involved/volunteer/"},
+{n:"Green Tukwila Partnership",l:"tukwila",c:["environment"],d:"Join restoration work parties removing invasives, planting natives and mulching across Tukwila's parks and urban forests.",u:"https://www.tukwilawa.gov/departments/parks-and-recreation/volunteering/green-tukwila-partnership/"},
+{n:"Highline Area Food Bank",l:"burien",c:["food"],d:"Sort perishables, register clients, pick up store donations, assist shoppers and run monthly evening distributions.",u:"https://highlineareafoodbank.org/volunteer"},
+{n:"Highline Heritage Museum",l:"burien",c:["arts"],d:"Staff the front desk, support events, help with exhibits, data entry, marketing and fundraising.",u:"https://highlinemuseum.org/support/volunteering/"},
+{n:"Hopelink",l:"bellevue",c:["food","human"],d:"Sort and stock food-market donations, drive grocery-rescue pickups, deliver to homebound clients and tutor adults at service centers in Bellevue, Kirkland, Redmond and Carnation.",u:"https://www.hopelink.org/ways-to-help/volunteer/"},
+{n:"Imagine Housing",l:"bellevue",c:["housing"],d:"Host resident events, build community and support programs at 15 affordable apartment communities across the Eastside.",u:"https://imaginehousing.org/get-involved/volunteer/"},
+{n:"International Rescue Committee (IRC) Seattle & SeaTac",l:"seatac",c:["refugees"],d:"Tutor newcomer students, teach citizenship classes, greet at the front desk, mentor refugee youth and intern with resettlement teams.",u:"https://www.rescue.org/volunteer-opportunities/seattle-wa"},
+{n:"Issaquah Alps Trails Club",l:"issaquah",c:["environment"],d:"Lead guided hikes, advocate for public lands, and run trail-building and habitat-restoration events on Tiger, Squak, Cougar and Rattlesnake Mountains.",u:"https://www.issaquahalps.org/get-involved"},
+{n:"Issaquah Food & Clothing Bank",l:"issaquah",c:["food"],d:"Stock shelves, pack groceries, run food drives, help clients shop and support Harvest Issaquah gleaning shifts.",u:"https://www.issaquahfoodbank.org/volunteer/"},
+{n:"Jewish Family Service (Polack Food Bank)",l:"seattle",c:["food"],d:"Distribute food and toiletries, portion bulk goods, tend the giving garden, and deliver groceries to homebound neighbors.",u:"https://www.jfsseattle.org/volunteer/"},
+{n:"Kent Food Bank and Emergency Services",l:"kent",c:["food"],d:"Help with shifts preparing and distributing groceries to Kent neighbors in need.",u:"https://www.kentfoodbank.org/"},
+{n:"Kent Parks Outdoor Conservation Events",l:"kent",c:["environment"],d:"Participate in habitat restoration and conservation work parties in Kent parks and open spaces.",u:"https://www.kentwa.gov/departments/kent-parks/volunteering/outdoor-conservation-events"},
+{n:"Kent Youth and Family Services",l:"kent",c:["youth","human"],d:"Support counseling, early childhood education and youth development programs.",u:"https://kyfs.org"},
+{n:"KentHOPE Day Center for Women & Children",l:"kent",c:["housing"],d:"Serve meals, mentor guests and support day-to-day operations for homeless women and children.",u:"https://kenthope.org/home/"},
+{n:"KidVantage (formerly Eastside Baby Corner)",l:"issaquah",c:["human","youth"],d:"Receive and sort donations and pack weekly orders of diapers, clothing, car seats and essentials for kids served by partner agencies.",u:"https://kidvantagenw.org/volunteer/"},
+{n:"Kindering",l:"bellevue",c:["health","youth"],d:"Support classrooms, administration, events and fundraising for children of diverse abilities receiving therapies and early education.",u:"https://kindering.org/get-involved/volunteer-opportunities/"},
+{n:"King Conservation District",l:"renton",c:["environment"],d:"Pot, weed and water native plants at the Native Plant Nursery and join stream and wetland restoration events countywide.",u:"https://kingcd.org/get-involved/volunteer/"},
+{n:"Kirkland Arts Center",l:"kirkland",c:["arts"],d:"Assist art studios, marketing, fundraising, archiving and grounds care at this community arts organization.",u:"https://kirklandartscenter.org/volunteer/"},
+{n:"Kirkland Nourishing Network",l:"kirkland",c:["food"],d:"Coordinate school-break food boxes and grocery cards for food-insecure Lake Washington School District families.",u:"https://kirklandnourishingnetwork.org/index.php/volunteer/"},
+{n:"Lake Washington Schools Foundation",l:"kirkland",c:["youth"],d:"Pack and deliver weekly Pantry Packs weekend food bags and serve as LINKS lunch-buddy mentors and tutors in LWSD schools.",u:"https://www.lwsf.org/volunteers/"},
+{n:"LifeWire",l:"bellevue",c:["human"],d:"Support domestic-violence survivors through donation sorting, administrative help, events and safe-housing projects.",u:"https://www.lifewire.org/volunteer/"},
+{n:"Little Bit Therapeutic Riding Center",l:"redmond",c:["health"],d:"Lead horses and side-walk during therapeutic riding lessons for people with disabilities.",u:"https://www.littlebit.org/volunteer"},
+{n:"Low Income Housing Institute (LIHI)",l:"seattle",c:["housing"],d:"Build tiny houses, landscape and paint tiny-house village sites, and assemble meals and supply donations for villagers.",u:"https://www.lihihousing.org/volunteer"},
+{n:"Mary's Place",l:"seattle",c:["housing"],d:"Serve meals, host activities, build essential-supply kits and furnish apartments for families moving into housing.",u:"https://www.marysplaceseattle.org/get-involved/volunteer"},
+{n:"Maltby Food Bank",l:"woodinville",c:["food"],d:"Drive food-pickup truck routes, sort produce and help clients carry groceries to their cars.",u:"https://www.maltbyfoodbank.org/volunteering/"},
+{n:"MEOW Cat Rescue",l:"kirkland",c:["animals"],d:"Shelter assistants, kennel attendants, adoption counselors and fosters provide daily care for rescued cats and kittens.",u:"https://meowcatrescue.org/volunteer/"},
+{n:"Mercer Island Thrift Shop (supporting MIYFS)",l:"mercerisland",c:["human"],d:"Process donations, run curbside drop-off, cashier and manage sales whose proceeds fund Mercer Island Youth & Family Services.",u:"https://www.mercerislandthrift.org/volunteer"},
+{n:"Mid Sound Fisheries Enhancement Group",l:"woodinville",c:["environment"],d:"Revegetate Sammamish River banks with native trees and shrubs to cool water for Chinook salmon and steelhead.",u:"https://www.midsoundfisheries.org/"},
+{n:"Mountains to Sound Greenway Trust",l:"regional",c:["environment"],d:"Trail maintenance and construction, forest restoration, native plant nursery work and Trailhead Ambassador duty across the I-90 Greenway.",u:"https://mtsgreenway.org/get-involved/volunteer/"},
+{n:"Meals on Wheels King County",l:"regional",c:["seniors"],d:"Deliver meals to homebound seniors, take orders by phone, and coordinate routes countywide.",u:"https://soundgenerations.org/our-programs/food-security/meals-on-wheels/volunteer/"},
+{n:"Museum of Flight",l:"seattle",c:["arts"],d:"Docents, pavilion ambassadors, living-history presenters, photo archivists and restoration helpers at the world's largest independent air and space museum.",u:"https://www.museumofflight.org/about/volunteer-opportunities"},
+{n:"Museum of Pop Culture (MoPOP)",l:"seattle",c:["arts"],d:"Answer guest questions, support interactive exhibitions, lead hands-on activities and assist at events.",u:"https://www.mopop.org/volunteer"},
+{n:"NAMI Seattle",l:"seattle",c:["health"],d:"Lead peer and family support groups, teach mental-health classes, and staff outreach and advocacy efforts.",u:"https://namiseattle.org/get-involved/volunteer/"},
+{n:"New Bethlehem Program (Catholic Community Services)",l:"kirkland",c:["housing"],d:"Cook, donate and serve dinner daily at the New Bethlehem day center and shelter for families.",u:"https://www.nbpshelter.org"},
+{n:"North Helpline",l:"seattle",c:["food"],d:"Pack to-go groceries, sort freight, assist in-person distribution and deliver food boxes to homebound clients in Lake City and Bitter Lake.",u:"https://northhelpline.org/volunteer"},
+{n:"Northshore Senior Center",l:"bothell",c:["seniors"],d:"Greet at front desks, serve community dining lunches, teach fitness classes, do yard work and staff the thrift shop in Bothell, Kenmore and Woodinville.",u:"https://www.northshoreseniorcenter.org/volunteer-opportunities"},
+{n:"Northwest Folklife",l:"seattle",c:["arts"],d:"Year-round and festival volunteers greet attendees, register performers, staff info booths and support sustainability at the free Folklife Festival.",u:"https://nwfolklife.org/support/volunteer.html"},
+{n:"Northwest Harvest",l:"seattle",c:["food"],d:"Sort and repack food at distribution centers and help run the SODO Community Market free grocery store.",u:"https://www.northwestharvest.org/get-involved/volunteer/"},
+{n:"Operation Nightwatch",l:"seattle",c:["housing"],d:"Groups cook and serve the nightly meal for ~150 guests, hand out socks and hygiene supplies, and make sandwiches for street outreach.",u:"https://www.seattlenightwatch.org/how-to-help/volunteer/"},
+{n:"Orca Conservancy",l:"seattle",c:["environment"],d:"Support Be Whale Wise boater education, salmon habitat restoration, oil-spill response prep and outreach.",u:"https://www.orcaconservancy.org/volunteer/"},
+{n:"Orca Network",l:"whidbey",c:["environment"],d:"Report whale sightings as citizen scientists, staff the Langley Whale Center, and help with marine-mammal stranding response and education.",u:"https://orcanetwork.org/"},
+{n:"Oxbow Farm & Conservation Center",l:"duvall",c:["environment","food"],d:"Restore habitat, tend the Kids' Farm garden and glean field produce weekly for Hopelink and other hunger-relief partners.",u:"https://www.oxbow.org/get-involved/volunteer/"},
+{n:"PAWS (Progressive Animal Welfare Society)",l:"lynnwood",c:["animals"],d:"Care for shelter cats and dogs, feed orphaned wildlife, staff Cat City in Seattle, foster animals and help at events.",u:"https://www.paws.org/volunteer/"},
+{n:"Pacific Science Center",l:"seattle",c:["arts"],d:"Deliver science interpretation on the floor, facilitate Tinker Tank makerspace activities and support office operations.",u:"https://www.pacificsciencecenter.org/volunteers/"},
+{n:"Page Ahead Children's Literacy Program",l:"seattle",c:["youth"],d:"Run Book Up Summer book fairs, read Story Time aloud in classrooms, and sort books for at-risk young readers.",u:"https://pageahead.org/volunteer/"},
+{n:"Pasado's Safe Haven",l:"sultan",c:["animals"],d:"Care for rescued dogs, cats and farmed animals at the 85-acre sanctuary, assist spay/neuter clinics and support humane education.",u:"https://www.pasadosafehaven.org/get-involved/volunteer/"},
+{n:"Pike Market Senior Center & Food Bank",l:"seattle",c:["food","seniors"],d:"Run grocery distribution lines, do grocery rescue and bagel runs, pack orders and deliver groceries downtown.",u:"https://www.pmsc-fb.org/food-bank-volunteering"},
+{n:"Plymouth Housing",l:"seattle",c:["housing"],d:"Lead activities and cooking clubs, staff the free Plymouth Supply Center, and do group service events for formerly homeless residents.",u:"https://plymouthhousing.org/support/volunteer/"},
+{n:"Project Feast",l:"kent",c:["refugees"],d:"Support culinary apprenticeship training, community meals and cafe operations that empower refugee and immigrant cooks.",u:"https://projectfeast.org/about-us/jobs-volunteer/"},
+{n:"Puget Soundkeeper Alliance",l:"seattle",c:["environment"],d:"Clean beaches, paddle waterways collecting debris, and monitor pollution across Puget Sound.",u:"https://pugetsoundkeeper.org/volunteer/"},
+{n:"Queen Anne Food Bank",l:"seattle",c:["food"],d:"Make sack lunches and soup, prep in the kitchen, and drive weekly food-donation pickups.",u:"https://ccsww.org/services/the-queen-anne-food-bank/"},
+{n:"RASKC – Regional Animal Services of King County",l:"kent",c:["animals"],d:"Walk dogs, socialize cats, foster animals and support adoptions at the Kent pet adoption center.",u:"https://kingcounty.gov/en/dept/executive-services/animals-pets-pests/regional-animal-services/volunteer"},
+{n:"Rainier Valley Food Bank",l:"seattle",c:["food"],d:"Hand out groceries, pack home-delivery bags, drive deliveries, provide translation help and join committees.",u:"https://www.rvfb.org/volunteer"},
+{n:"Reading Partners Seattle",l:"seattle",c:["youth"],d:"Give one hour per week of structured one-on-one literacy tutoring to elementary students at Title I schools.",u:"https://readingpartners.org/volunteer-in-seattle/"},
+{n:"REACH Renton (Center of Hope Family Shelter)",l:"renton",c:["housing"],d:"Serve Saturday meals, donate meals for shelter families, lead kids' activities, organize donations and staff the cold-weather shelter.",u:"https://reachrenton.org/volunteer"},
+{n:"Recovery Café",l:"seattle",c:["human","health"],d:"Café Companions serve coffee and meals, clean, and build relationships with members recovering from homelessness and addiction.",u:"https://recoverycafe.org/volunteer/"},
+{n:"Redmond Food Box Program",l:"redmond",c:["food"],d:"Pack and deliver monthly boxes of food to Redmond neighbors facing food insecurity.",u:"https://www.redmondfoodbox.org/volunteer"},
+{n:"Refugee Women's Alliance (ReWA)",l:"seattle",c:["refugees"],d:"Assist early learning centers, ESL classes, citizenship prep and youth STEAM programs for refugee and immigrant families.",u:"https://www.rewa.org/giving/volunteer/"},
+{n:"Renton Historical Society (Renton History Museum)",l:"renton",c:["arts"],d:"Help with landscape maintenance, collections, events and creating inclusive spaces connecting the community to local history.",u:"https://www.rentonhistory.org/volunteer"},
+{n:"Renewal Food Bank",l:"bellevue",c:["food"],d:"All-ages volunteers distribute culturally familiar groceries, produce, baby items and hygiene supplies to Eastside families.",u:"https://renewalfoodbank.org/volunteer"},
+{n:"ROOTS Young Adult Shelter",l:"seattle",c:["housing","youth"],d:"Staff overnight and evening shifts, prepare dinners and build relationships with young adults staying at the U-District shelter.",u:"https://rootsinfo.org/"},
+{n:"Salvation Army Renton Corps (Renton Rotary Food Bank)",l:"renton",c:["food"],d:"Support food bank operations and community assistance programs at the Tobin Street facility.",u:"https://renton.salvationarmy.org/renton_corps/food-bank"},
+{n:"SHADOW Lake Nature Preserve",l:"renton",c:["environment"],d:"Restoration assistants, boardwalk stewards, nature-walk leads and event helpers protect a 5,000-year-old peat bog.",u:"https://shadowhabitat.org/volunteer"},
+{n:"Snoqualmie Valley Food Bank",l:"northbend",c:["food"],d:"Unload and sort deliveries, restock and distribute groceries, and drive morning grocery-rescue routes.",u:"https://www.snoqualmievalleyfoodbank.org/volunteer-1"},
+{n:"Salvation Army Seattle Social Services",l:"seattle",c:["human","food"],d:"Help with the food bank, meal service, shelter support and seasonal drives like bell ringing for homeless and low-income neighbors.",u:"https://seattle.salvationarmy.org/seattle_services/"},
+{n:"Seattle Aquarium",l:"seattle",c:["arts","environment"],d:"Interpret exhibits for guests, join Youth Ocean Advocates, and serve as Beach Naturalists and salmon-journey naturalists.",u:"https://www.seattleaquarium.org/volunteer"},
+{n:"Seattle Art Museum",l:"seattle",c:["arts"],d:"Volunteers and docents support visitor services and lead public and school tours across SAM's three sites.",u:"https://www.seattleartmuseum.org/whats-on/programs/volunteers"},
+{n:"Seattle Animal Shelter",l:"seattle",c:["animals"],d:"Walk dogs, enrich cats and critters, foster animals in your home, support adoptions and run the pet food bank.",u:"https://www.seattle.gov/animal-shelter/get-involved/volunteer"},
+{n:"Seattle Humane",l:"bellevue",c:["animals"],d:"Walk and socialize dogs, care for cats and small mammals, pack Pet Food Bank meals, foster, and support the vet clinic and adoptions.",u:"https://www.seattlehumane.org/get-involved/volunteer/"},
+{n:"Seattle Public Schools Volunteer Program",l:"seattle",c:["youth"],d:"Apply to tutor, mentor, assist in classrooms and chaperone in district schools after a background check.",u:"https://www.seattleschools.org/departments/volunteer"},
+{n:"Seattle ReCreative",l:"seattle",c:["environment","arts"],d:"Sort donated art and craft supplies, stock the reuse store, and divert usable materials from the landfill.",u:"https://www.seattlerecreative.org/volunteer"},
+{n:"Sierra Club Washington State Chapter",l:"seattle",c:["environment"],d:"Activists serve on issue committees (wildlife, public lands, climate), organize outings and run grassroots campaigns statewide.",u:"https://www.sierraclub.org/washington/get-involved"},
+{n:"Solid Ground",l:"seattle",c:["human","food"],d:"Grow food at Marra Farm, tutor Sand Point Housing youth, knit winter wear, and support anti-poverty housing and food programs.",u:"https://www.solid-ground.org/volunteer-opportunities/"},
+{n:"Sound Generations",l:"regional",c:["seniors"],d:"Staff senior centers, drive older adults to appointments, pack meals and support programs across King County.",u:"https://soundgenerations.org/get-involved/volunteer/"},
+{n:"Sound Salmon Solutions (Stilly-Snohomish Fisheries Task Force)",l:"everett",c:["environment"],d:"Assist weekend riparian plantings, vegetation and water-quality monitoring, nursery care and school programs in the Stillaguamish and Snohomish watersheds.",u:"https://stillysnofish.org/"},
+{n:"Sophia Way",l:"bellevue",c:["housing"],d:"Prepare and serve meals, staff shelters, sort donations and offer companionship to women experiencing homelessness.",u:"https://sophiaway.org/volunteer/"},
+{n:"Sustainable Renton",l:"renton",c:["food","environment"],d:"Glean, sort and distribute rescued food, tend Greens-for-Good gardens, and host free community meals.",u:"https://www.sustainablerenton.org/volunteer"},
+{n:"Sno-Valley Senior Center",l:"duvall",c:["seniors"],d:"Serve lunch, staff reception and the thrift shop, and make outreach visits to homebound seniors in the Snoqualmie Valley.",u:"https://snovalleysenior.org/get-involved/volunteer"},
+{n:"Swedish Medical Center (First Hill)",l:"seattle",c:["health"],d:"Work information desks, gift shops and patient-care areas on roughly one four-hour shift per week.",u:"https://www.swedish.org/locations/first-hill-campus/volunteer"},
+{n:"Tilth Alliance",l:"seattle",c:["environment","food"],d:"Weed, plant and harvest produce for food banks at Rainier Beach Urban Farm, Good Shepherd Center, Bradner Gardens and McAuliffe Park.",u:"https://tilthalliance.org/get-involved/volunteer-with-us/"},
+{n:"Treehouse",l:"seattle",c:["youth"],d:"Sort donations and stock the free Treehouse Store where youth in foster care shop for clothes, school supplies and toys.",u:"https://www.treehouseforkids.org/take-action/volunteer/"},
+{n:"Teen Feed",l:"seattle",c:["youth","housing"],d:"Join meal teams cooking dinners, serve as meal-time advocates and staff street-outreach teams for homeless youth in the U-District.",u:"https://teenfeed.org/volunteer/"},
+{n:"Tukwila Pantry",l:"tukwila",c:["food"],d:"Sort donations, translate, do client intake, distribute groceries and cook the Thursday community meal.",u:"https://www.tukwilapantry.org/volunteer"},
+{n:"Union Gospel Mission",l:"seattle",c:["housing","food"],d:"Serve meals, join Search + Rescue street outreach, sort donations and mentor guests in shelter programs.",u:"https://www.ugm.org/take-action/volunteer"},
+{n:"University District Food Bank",l:"seattle",c:["food"],d:"Check customers in and out, bag groceries, sort donations, do grocery rescue and prep meals.",u:"https://www.udistrictfoodbank.org/volunteer"},
+{n:"UW Medicine Volunteer Program",l:"seattle",c:["health"],d:"Escort patients, staff information desks and support visitors at UW Medical Center Montlake and Northwest campuses plus Harborview.",u:"https://www.uwmedicine.org/volunteering"},
+{n:"Washington Trails Association",l:"regional",c:["environment"],d:"Join day and backcountry work parties building and maintaining hiking trails statewide — no experience needed.",u:"https://www.wta.org/get-involved/volunteer"},
+{n:"Wellspring Family Services",l:"seattle",c:["housing","human"],d:"Staff the Family Store, assemble kits, support family resource fairs and help with admin for family-homelessness programs.",u:"https://wellspringfs.org/get-involved/volunteerism/"},
+{n:"West Seattle Food Bank",l:"seattle",c:["food"],d:"Work the warehouse, Clothesline clothing bank, mobile distributions and home deliveries after an online orientation.",u:"https://westseattlefoodbank.org/volunteer/"},
+{n:"WestSide Baby",l:"seattle",c:["human"],d:"Sort clothing and diaper donations, bundle diapers, inspect car seats and cribs, and fill supply orders for local children.",u:"https://westsidebaby.org/volunteer/"},
+{n:"Whale Scout",l:"bothell",c:["environment"],d:"Plant native trees and pull invasives at Helpin' Out salmon-habitat restoration events benefiting endangered orcas' food supply.",u:"https://www.whalescout.org/act"},
+{n:"White Center Food Bank",l:"seattle",c:["food"],d:"Run grocery-rescue pickups, staff the market-style shop, work the warehouse and deliver groceries by bike.",u:"https://www.whitecenterfoodbank.org/volunteer"},
+{n:"Woodland Park Zoo",l:"seattle",c:["arts","environment"],d:"Zoo ambassadors engage guests and facilitate experiences, with later roles in docent education and horticulture.",u:"https://www.zoo.org/volunteer/"},
+{n:"World Relief Western Washington",l:"kent",c:["refugees"],d:"Teach ESL, mentor refugee youth, provide digital-literacy help, garden, and welcome asylum-seekers and newly arrived families.",u:"https://worldreliefseattle.org/volunteer"},
+{n:"YMCA of Greater Seattle",l:"regional",c:["youth"],d:"Mentor youth, coach sports, teach classes, support camps and help at branches across King and south Snohomish counties.",u:"https://www.seattleymca.org/give/volunteer"},
+{n:"YMCA of Snohomish County",l:"everett",c:["youth"],d:"Lead youth programs like Leaders Club and Youth in Government, swim instruction and community projects at seven branches.",u:"https://www.ymca-snoco.org/volunteer/"},
+{n:"YWCA Seattle–King–Snohomish",l:"regional",c:["housing","human"],d:"Serve meals at Angeline's Day Center, clean and stock units for new families, organize donations and host drives and programs.",u:"https://www.ywcaworks.org/volunteer"},
+{n:"YouthCare",l:"seattle",c:["youth","housing"],d:"Cook and serve meals at the Orion Center, tutor, and support housing and employment programs for youth experiencing homelessness.",u:"https://youthcare.org/volunteer-today/"},
+{n:"Zero Waste Washington",l:"seattle",c:["environment"],d:"Contribute research, policy analysis, FAQ writing and event support advancing waste-prevention legislation.",u:"https://zerowastewashington.org/join-us/volunteer/"},
+{n:"Athletes for Kids",l:"sammamish",c:["youth"],d:"High-school athlete volunteers are paired one-on-one as mentors to children with disabilities and special needs.",u:"https://athletesforkids.org/become-mentor/"},
+{n:"American Cancer Society Discovery Shop (West Seattle)",l:"seattle",c:["health"],d:"Sort and price donated merchandise, create displays and run registers at resale shops funding cancer research and patient support.",u:"https://www.cancer.org/involved/volunteer/discovery-shops.html"},
+{n:"Des Moines Area Food Bank",l:"desmoines",c:["food"],d:"Sort food, greet guests, restock the food line, unload trucks, drive food-bank vehicles and help with summer meals for kids.",u:"https://myfoodbank.org/volunteer"},
+{n:"Henry Art Gallery",l:"seattle",c:["arts"],d:"Occasionally assist during events and exhibition openings at the UW's contemporary art museum.",u:"https://henryart.org/about/opportunities"},
+{n:"HealthPoint",l:"renton",c:["health"],d:"Support fundraising, administration, committee work and clinical support for this network of community health centers.",u:"https://www.healthpointchc.org/support-us/volunteer"},
+{n:"Kandelia",l:"seattle",c:["refugees","youth"],d:"Tutor immigrant and refugee youth, support in-classroom learning at Seattle World School, and help with food-access programs.",u:"https://www.kandelia.org/programs/community-engagement/"},
+{n:"KidsQuest Children's Museum",l:"bellevue",c:["arts","youth"],d:"Engage children in hands-on STEAM play on the museum floor, assist summer camps and help at special events (ages 14+).",u:"https://www.kidsquestmuseum.org/support/volunteer/"},
+{n:"Nepal Seattle Society",l:"seattle",c:["refugees"],d:"Help unite people of Nepali origin in Washington through cultural events, community programs and the Nepali Community Center project.",u:"https://nepalseattle.org/"},
+{n:"New Horizons",l:"seattle",c:["housing","youth"],d:"Prepare breakfast and dinner in the commercial kitchen, interact with youth in the Belltown drop-in center and do facility projects.",u:"https://nhmin.org/volunteer/"},
+{n:"Overlake Medical Center & Clinics",l:"bellevue",c:["health"],d:"Welcome guests at concierge desks, transport patients and support clinical units, surgery recovery and administrative teams.",u:"https://www.overlakehospital.org/about/volunteer"},
+{n:"Peter Kirk Community Center Senior Lunch Program",l:"kirkland",c:["seniors"],d:"With a food-handler permit, set up, prepare, serve and clean up hot lunches for seniors in partnership with Catholic Community Services.",u:"https://www.kirklandwa.gov/Government/City-Managers-Office/Volunteer-Opportunities"},
+{n:"Southwest Youth & Family Services",l:"burien",c:["youth","human"],d:"Serve as reading buddies, after-school tutors and camp counselors at sites in Burien and SeaTac.",u:"https://www.swyfs.org/"},
+{n:"Asian Counseling and Referral Service (ACRS)",l:"seattle",c:["culture","health","food"],d:"Volunteers power the food bank, community farm and Club Bamboo kitchen serving Asian American and Pacific Islander communities in 40+ languages.",u:"https://acrs.org/volunteer"},
+{n:"Chinese Information and Service Center (CISC)",l:"seattle",c:["culture","refugees"],d:"Tutor ESL and naturalization students, support seniors and youth programs, and help immigrants and their families thrive across King County.",u:"https://cisc-seattle.org/get-involved/"},
+{n:"InterIm CDA / Danny Woo Community Garden",l:"seattle",c:["culture","environment","housing"],d:"Weed, compost and maintain the Chinatown-ID's largest green space alongside elder immigrant gardeners, or support the WILD youth leadership program.",u:"https://interimcda.org/volunteer/"},
+{n:"API Chaya",l:"seattle",c:["culture","human","health"],d:"Join the Natural Helpers program supporting South Asian, Asian and Pacific Islander survivors of gender-based violence through interpretation, events and community organizing.",u:"https://www.apichaya.org/volunteer"},
+{n:"Wing Luke Museum",l:"seattle",c:["arts","culture"],d:"Support exhibits, tours and events celebrating Asian American, Native Hawaiian and Pacific Islander stories in the Chinatown-International District.",u:"https://www.wingluke.org/volunteer"},
+{n:"Kin On Health Center",l:"seattle",c:["seniors","culture","health"],d:"Befriend elders, lead activities, perform, or help at signature events serving Chinese-speaking seniors and disabled adults.",u:"https://kinon.org/join-us/give/volunteer/"},
+{n:"Japanese Cultural & Community Center of Washington",l:"seattle",c:["arts","culture"],d:"Yoisho! volunteers run cultural festivals, staff the Hosekibako resale shop, help the Nikkei Bunko library, and maintain the historic Japantown campus.",u:"https://www.jcccw.org/volunteer"},
+{n:"Filipino Community of Seattle",l:"seattle",c:["culture","seniors"],d:"Help serve weekly senior lunches and food pantry, support youth programs and join events at the Rainier Valley community center.",u:"https://www.filcommsea.org/get-involved"},
+{n:"Helping Link/Một Dấu Nối",l:"seattle",c:["refugees","culture","youth"],d:"Teach adult ESL and citizenship classes, tutor youth, and lend tech, marketing or translation skills to Seattle's Vietnamese community.",u:"https://www.helpinglink.org/volunteer/"},
+{n:"United Indians of All Tribes Foundation",l:"seattle",c:["culture","human"],d:"Help run powwows and community events at Daybreak Star Indian Cultural Center in Discovery Park — setup, food service, elder support and more.",u:"https://unitedindians.org/volunteer/"},
+{n:"Chief Seattle Club",l:"seattle",c:["housing","culture"],d:"Sacred-space day center for urban Native peoples in Pioneer Square (volunteer intake currently paused — check their page for updates).",u:"https://www.chiefseattleclub.org/volunteer"},
+{n:"Sea Mar Community Health Centers",l:"regional",c:["health","culture"],d:"Support clinics, education programs and cultural services at Washington's largest Latino-serving community health network.",u:"https://www.seamar.org/volunteer-program.html"},
+{n:"Horn of Africa Services",l:"seattle",c:["refugees","culture","youth"],d:"Tutor East African immigrant and refugee youth in after-school and virtual programs, mentor students and support family services.",u:"https://www.hoas.org/get-involved"},
+{n:"Urban League of Metropolitan Seattle",l:"seattle",c:["human","culture","youth"],d:"Support housing, workforce, education and advocacy programs serving Black communities and others across the region.",u:"https://urbanleague.org/volunteer"},
+{n:"Lambert House LGBTQ Youth Center",l:"seattle",c:["youth","culture","human"],d:"Adults mentor queer youth at the Capitol Hill drop-in center; volunteers also provide meals, lead activities and help behind the scenes.",u:"https://www.lamberthouse.org/volunteer"},
+{n:"Latino Educational Training Institute (LETI)",l:"lynnwood",c:["refugees","culture","youth"],d:"Teach classes, translate, organize events and mentor Latino families in south Snohomish County.",u:"https://letiwa.org/about.html"}];
+</script>
+<script>
+(function(){
+"use strict";
+var grid=document.getElementById("grid"),empty=document.getElementById("empty"),
+count=document.getElementById("count"),chips=document.getElementById("chips"),
+sel=document.getElementById("loc"),q=document.getElementById("q"),
+clearBtn=document.getElementById("clear"),surpriseBtn=document.getElementById("surprise"),
+stats=document.getElementById("stats"),lastFiltered=[];
+function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;}
+function pill(text,color){return '<span class="pill" style="background:'+color+'1c;color:'+color+'">'+text+"</span>";}
+(function treeline(){for(var d="",x=-10;x<1460;x+=40){var h=64+((x*7919)%43);d+="M"+x+",262 L"+(x+26)+","+(262-h)+" L"+(x+52)+",262 Z ";}document.getElementById("trees").setAttribute("d",d);})();
+function locOptions(){
+  var groups={},order=["Everywhere","Seattle","Eastside","Snoqualmie Valley","South King County","Snohomish County","Other"],html='<option value="">All locations</option>';
+  Object.keys(LOCS).forEach(function(k){var g=LOCS[k][1];(groups[g]=groups[g]||[]).push([k,LOCS[k][0]]);});
+  order.forEach(function(g){
+    if(!groups[g])return;
+    html+='<optgroup label="'+g+'">';
+    groups[g].sort(function(a,b){return a[1].localeCompare(b[1]);}).forEach(function(p){html+='<option value="'+p[0]+'">'+p[1]+"</option>";});
+    html+="</optgroup>";
+  });
+  sel.innerHTML=html;
+}
+function chipRow(){
+  var html='<button class="chip active" data-c="">All causes</button>';
+  Object.keys(CAUSES).forEach(function(k){html+='<button class="chip" data-c="'+k+'"><span class="dot" style="background:'+CAUSES[k][1]+'"></span>'+CAUSES[k][0]+"</button>";});
+  chips.innerHTML=html;
+}
+function cardHTML(o){
+  var badges=o.c.map(function(k){return pill(CAUSES[k][0],CAUSES[k][1]);}).join("")+'<span class="pill loc">'+LOCS[o.l][0]+"</span>";
+  return '<article class="card"><h2>'+o.n+'</h2><p>'+o.d+'</p><div class="badges">'+badges+'</div><a class="go" href="'+o.u+'" target="_blank" rel="noopener noreferrer">Volunteer \u2192</a></article>';
+}
+function apply(){
+  var term=q.value.trim().toLowerCase(),html="",sorted=ORGS.slice().sort(function(a,b){return a.n.localeCompare(b.n);});
+  lastFiltered=[];
+  sorted.forEach(function(o){
+    if(activeCause&&o.c.indexOf(activeCause)===-1)return;
+    if(activeLoc&&o.l!==activeLoc)return;
+    if(term&&(o.n+" "+o.d+" "+LOCS[o.l][0]+" "+CAUSES[o.c[0]][0]).toLowerCase().indexOf(term)===-1)return;
+    lastFiltered.push(o);html+=cardHTML(o);
+  });
+  grid.innerHTML=html;
+  empty.style.display=lastFiltered.length?"none":"block";
+  count.textContent=lastFiltered.length+" of "+ORGS.length+" organizations";
+}
+chips.addEventListener("click",function(e){
+  var b=e.target.closest(".chip");if(!b)return;
+  activeCause=b.getAttribute("data-c");
+  chips.querySelectorAll(".chip").forEach(function(c){c.classList.toggle("active",c===b);});
+  apply();
+});
+sel.addEventListener("change",function(){activeLoc=sel.value;apply();});
+q.addEventListener("input",apply);
+clearBtn.addEventListener("click",function(){
+  q.value="";activeCause="";activeLoc="";sel.value="";
+  chips.querySelectorAll(".chip").forEach(function(c){c.classList.toggle("active",!c.getAttribute("data-c"));});
+  apply();
+});
+surpriseBtn.addEventListener("click",function(){
+  if(!lastFiltered.length)return;
+  var pick=lastFiltered[Math.floor(Math.random()*lastFiltered.length)];
+  var idx=lastFiltered.indexOf(pick),card=grid.children[idx];
+  if(card){card.scrollIntoView({behavior:"smooth",block:"center"});card.classList.remove("flash");void card.offsetWidth;card.classList.add("flash");}
+});
+var activeCause="",activeLoc="";
+(function init(){
+  locOptions();chipRow();
+  var cities=new Set();ORGS.forEach(function(o){cities.add(LOCS[o.l][0]);});
+  stats.innerHTML="<b>"+ORGS.length+" organizations</b><b>"+Object.keys(CAUSES).length+" causes</b><b>"+cities.size+" communities</b>";
+  apply();
+})();
+})();
+</script>
+</body>
+</html>
