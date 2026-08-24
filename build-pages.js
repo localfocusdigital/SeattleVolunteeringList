@@ -120,9 +120,7 @@ function renderBody(p){
   body+='<div class="cta"><p>These '+orgs.length+" listings are part of a larger directory of "+ORGS.length+" organizations across the Puget Sound region.</p><a href=\""+BASE+"\">Browse the full directory \u2192</a></div>";
   return body;
 }
-const guideLinks=PAGES.map(p=>'<a href="'+BASE+p.slug+'/">'+p.h1+"</a>").join("");
-const guidesSection='\n<section class="wrap guides"><h2>Popular guides</h2><p>Deep-dives for common ways to help:</p><nav class="guidecloud">'+guideLinks+"</nav></section>\n";
-html=html.replace('<svg class="divider"',guidesSection+'<svg class="divider"');
+html=html.replace(/<section class="wrap guides">[\s\S]*?<\/section>\s*/g,"");
 if(!html.includes("og:type"))html=html.replace("</title>","</title>\n"+'<meta property="og:type" content="website">\n<meta property="og:url" content="'+BASE+'">\n<meta property="og:title" content="Volunteer Puget Sound">\n<meta property="og:description" content="187 nonprofits across Seattle, the Eastside, South King County and Snohomish County that need volunteers — searchable by cause and city.">\n<meta name="twitter:card" content="summary">');
 fs.writeFileSync("index.html",html);
 function pageHTML(p){
@@ -147,7 +145,18 @@ PAGES.forEach(p=>{
   fs.writeFileSync(path.join(dir,"index.html"),pageHTML(p));
   console.log(p.slug,"->",ORGS.filter(p.filter).length,"orgs");
 });
-const urls=[BASE,...PAGES.map(p=>BASE+p.slug+"/")];
+const urls=[BASE,BASE+"blog/",...PAGES.map(p=>BASE+p.slug+"/")];
+const BLOG_CSS="h1{font-family:Fraunces,Georgia,serif;font-size:clamp(1.9rem,4.5vw,2.8rem);font-weight:700;color:var(--ink);margin-bottom:10px}\n.pagehead{background:linear-gradient(180deg,var(--sky1),var(--sky2));padding:44px 0 34px;border-bottom:1px solid var(--line)}\n.topbar{background:var(--cream);border-bottom:1px solid var(--line);padding:14px 0}\n.topbar a.brand{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:1.15rem;color:var(--ink);text-decoration:none}\n.topbar a.cta-link{float:right;font-size:.88rem;font-weight:800;color:var(--green)}\n.bcard{background:#fff;border:1.5px solid #eadfce;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:8px;transition:transform .15s,box-shadow .15s}\n.bcard:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(23,51,74,.1)}\n.bcard h2{font-family:Fraunces,Georgia,serif;font-size:1.08rem;line-height:1.4}\n.bcard h2 a{color:#17334a;text-decoration:none}\n.bcard h2 a:hover{color:#20694f}\n.bcard p{font-size:.86rem;color:#5a7086;flex:1}\n.bcard span{font-size:.78rem;font-weight:800;color:#20694f}";
+const blogBody='<div class="grid">'+PAGES.map(p=>'<div class="bcard"><h2><a href="../'+p.slug+'/">'+p.title+"</a></h2><p>"+p.desc+"</p><span>Read the guide \u2192</span></div>").join("")+"</div>";
+const blogHTML='<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Guides & Stories \u2014 The Seattle Volunteer List</title>\n<meta name="description" content="Practical guides to volunteering around Seattle \u2014 seasonal pushes, cause deep-dives, teen service hours, corporate outings and more.">\n<link rel="canonical" href="'+BASE+'blog/">\n<link rel="icon" href="data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'.9em\' font-size=\'90\'>\u{1F332}</text></svg>">\n<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">\n<style>'+css+"\n"+BLOG_CSS+"</style>\n</head>\n<body>\n"+
+'<div class="topbar"><div class="wrap"><a class="brand" href="'+BASE+'">\u{1F332} The Seattle Volunteer List</a><a class="cta-link" href="'+BASE+'">Full directory \u2192</a></div></div>\n'+
+'<header class="pagehead"><div class="wrap"><h1>Guides & Stories</h1><p style="color:#38566e;font-weight:600;max-width:680px">Practical deep-dives on where, when and how to volunteer around Puget Sound \u2014 written from our directory of '+ORGS.length+" verified organizations.</p></div></header>\n"+
+'<main class="wrap" style="padding-top:28px">'+blogBody+'</main>\n'+
+'<footer style="background:#153f32;color:#cfe2d7;padding:30px 0;margin-top:60px"><div class="wrap" style="font-size:.85rem">Part of <a href="'+BASE+'" style="color:#fff;font-weight:800">The Seattle Volunteer List</a> \u2014 '+ORGS.length+" organizations across the region.</div></footer>\n"+
+"</body>\n</html>";
+fs.mkdirSync("blog",{recursive:true});
+fs.writeFileSync(path.join("blog","index.html"),blogHTML);
+
 const today=new Date().toISOString().slice(0,10);
 const sm='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urls.map(u=>" <url><loc>"+u+"</loc><lastmod>"+today+"</lastmod></url>").join("\n")+"\n</urlset>\n";
 fs.writeFileSync("sitemap.xml",sm);
