@@ -1,6 +1,6 @@
-# Volunteer Puget Sound
+﻿# The Seattle Volunteer List
 
-A static directory of **180+ nonprofits and community organizations** across the greater Seattle / Puget Sound region that accept volunteers — covering Seattle, Bellevue, Kirkland, Redmond, Woodinville, Bothell, Renton, Tukwila, Kent, Auburn, Burien, SeaTac, Des Moines, Federal Way, Issaquah, Sammamish, Mercer Island, the Snoqualmie Valley, and Snohomish County.
+A static directory of **187 nonprofits and community organizations** across the greater Seattle / Puget Sound region that accept volunteers — covering Seattle, Bellevue, Kirkland, Redmond, Woodinville, Bothell, Renton, Tukwila, Kent, Auburn, Burien, SeaTac, Des Moines, Federal Way, Issaquah, Sammamish, Mercer Island, the Snoqualmie Valley, and Snohomish County.
 
 Features: search, filter by cause (11 categories including **Culture & Heritage**), filter by city/area, **map view** (Leaflet/OpenStreetMap), requirement chips on every card (min age, background check, groups, commitment type), a "Surprise me" random pick, and every listing links directly to that organization's live volunteer page.
 
@@ -52,3 +52,4 @@ Commit and push — GitHub Pages updates automatically.
 ## Note
 
 Listings were last verified August 2026. Volunteer programs change schedules frequently; each card links to the source of truth so visitors always see current openings.
+
