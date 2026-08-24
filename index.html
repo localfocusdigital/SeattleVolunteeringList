@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{
   --cream:#fbf7ee; --card:#ffffff; --ink:#17334a; --muted:#5a7086;
@@ -67,6 +68,15 @@ main{padding:34px 0 80px}
 .go:hover{background:var(--salmon-dark);transform:translateY(1px);box-shadow:0 2px 0 #c74b33}
 @keyframes flashcard{0%,100%{box-shadow:0 2px 6px rgba(23,51,74,.05)}50%{box-shadow:0 0 0 5px rgba(255,111,84,.35)}}
 .card.flash{animation:flashcard 1.2s ease 2}
+.facts{display:flex;gap:6px;flex-wrap:wrap;margin-top:-3px}
+.fact{font-size:.68rem;font-weight:800;padding:3px 10px;border-radius:999px;background:#f3efe4;color:#6f6551}
+.viewseg{display:inline-flex;border:1.5px solid var(--line);border-radius:999px;overflow:hidden;background:var(--cream)}
+.vbtn{border:none;background:none;padding:8px 18px;font-weight:800;font-size:.84rem;color:var(--muted);cursor:pointer;font-family:inherit}
+.vbtn.active{background:var(--green);color:#fff}
+#mapbox{display:none}
+#map{height:660px;border-radius:20px;border:1.5px solid var(--line);z-index:1}
+.mapnote{font-size:.78rem;color:var(--muted);margin-top:10px}
+.leaflet-popup-content b{font-family:Fraunces,Georgia,serif;font-size:.95rem}
 
 .empty{display:none;text-align:center;padding:70px 20px;color:var(--muted)}
 .empty svg{width:110px;height:auto;margin-bottom:14px;opacity:.85}
@@ -131,20 +141,32 @@ footer li{margin-bottom:5px}
     <div class="chips" id="chips" role="group" aria-label="Filter by cause"></div>
     <div class="meta-row">
       <span id="count" aria-live="polite"></span>
-      <span class="actions">
-        <button class="surprise-btn" id="surprise">Surprise me!</button>
-        <button class="clear-btn" id="clear">Clear filters</button>
+      <span style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <span class="viewseg" role="group" aria-label="View mode">
+          <button class="vbtn active" id="vlist">List</button>
+          <button class="vbtn" id="vmap">Map</button>
+        </span>
+        <span class="actions">
+          <button class="surprise-btn" id="surprise">Surprise me!</button>
+          <button class="clear-btn" id="clear">Clear filters</button>
+        </span>
       </span>
     </div>
   </div></div>
 </div>
 
 <main class="wrap">
-  <div class="grid" id="grid"></div>
-  <div class="empty" id="empty">
+  <div id="listview">
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty">
     <svg viewBox="0 0 120 80" aria-hidden="true"><g fill="#9fc4da"><ellipse cx="45" cy="30" rx="28" ry="18"/><ellipse cx="75" cy="24" rx="22" ry="15"/><ellipse cx="62" cy="38" rx="30" ry="16"/></g><g stroke="#57a7bd" stroke-width="3" stroke-linecap="round"><line x1="35" y1="52" x2="31" y2="66"/><line x1="55" y1="54" x2="51" y2="68"/><line x1="75" y1="52" x2="71" y2="66"/><line x1="92" y1="54" x2="88" y2="68"/></g></svg>
     <b>Nothing here but drizzle…</b>
     Try a different search term, or clear the filters to browse everything.
+  </div>
+  </div>
+  <div id="mapbox">
+    <div id="map"></div>
+    <p class="mapnote" id="mapnote"></p>
   </div>
 </main>
 
@@ -298,6 +320,7 @@ const ORGS=[{n:"Acres of Diamonds",l:"duvall",c:["housing"],d:"Volunteers suppor
 {n:"Northshore Senior Center",l:"bothell",c:["seniors"],d:"Greet at front desks, serve community dining lunches, teach fitness classes, do yard work and staff the thrift shop in Bothell, Kenmore and Woodinville.",u:"https://www.northshoreseniorcenter.org/volunteer-opportunities"},
 {n:"Northwest Folklife",l:"seattle",c:["arts"],d:"Year-round and festival volunteers greet attendees, register performers, staff info booths and support sustainability at the free Folklife Festival.",u:"https://nwfolklife.org/support/volunteer.html"},
 {n:"Northwest Harvest",l:"seattle",c:["food"],d:"Sort and repack food at distribution centers and help run the SODO Community Market free grocery store.",u:"https://www.northwestharvest.org/get-involved/volunteer/"},
+{n:"Food Lifeline",l:"seattle",c:["food"],d:"Inspect, sort and repack millions of pounds of donated food at the Hunger Solution Center warehouse in South Park.",u:"https://foodlifeline.org/volunteer"},
 {n:"Operation Nightwatch",l:"seattle",c:["housing"],d:"Groups cook and serve the nightly meal for ~150 guests, hand out socks and hygiene supplies, and make sandwiches for street outreach.",u:"https://www.seattlenightwatch.org/how-to-help/volunteer/"},
 {n:"Orca Conservancy",l:"seattle",c:["environment"],d:"Support Be Whale Wise boater education, salmon habitat restoration, oil-spill response prep and outreach.",u:"https://www.orcaconservancy.org/volunteer/"},
 {n:"Orca Network",l:"whidbey",c:["environment"],d:"Report whale sightings as citizen scientists, staff the Langley Whale Center, and help with marine-mammal stranding response and education.",u:"https://orcanetwork.org/"},
@@ -387,7 +410,203 @@ const ORGS=[{n:"Acres of Diamonds",l:"duvall",c:["housing"],d:"Volunteers suppor
 {n:"Urban League of Metropolitan Seattle",l:"seattle",c:["human","culture","youth"],d:"Support housing, workforce, education and advocacy programs serving Black communities and others across the region.",u:"https://urbanleague.org/volunteer"},
 {n:"Lambert House LGBTQ Youth Center",l:"seattle",c:["youth","culture","human"],d:"Adults mentor queer youth at the Capitol Hill drop-in center; volunteers also provide meals, lead activities and help behind the scenes.",u:"https://www.lamberthouse.org/volunteer"},
 {n:"Latino Educational Training Institute (LETI)",l:"lynnwood",c:["refugees","culture","youth"],d:"Teach classes, translate, organize events and mentor Latino families in south Snohomish County.",u:"https://letiwa.org/about.html"}];
+const ATTRS={
+"Acres of Diamonds":[18,0,1,"both"],
+"Afghan Health Initiative":[null,null,1,"both"],
+"Atlantic Street Center":[18,1,1,"both"],
+"Attain Housing":[12,0,1,"both"],
+"Auburn Food Bank":[12,0,1,"both"],
+"Auburn Senior Activity Center":[16,null,1,"both"],
+"Ballard Food Bank":[12,0,1,"both"],
+"Bellevue Arts Museum":[16,0,1,"both"],
+"Bellevue LifeSpring":[16,0,1,"both"],
+"Bellevue Network on Aging":[18,null,null,"ongoing"],
+"Big Brothers Big Sisters of Puget Sound":[18,1,null,"ongoing"],
+"Bloodworks Northwest":[16,1,null,"both"],
+"Boys & Girls Clubs of Bellevue":[16,1,1,"both"],
+"Boys & Girls Clubs of King County":[16,1,1,"both"],
+"Byrd Barr Place":[12,0,1,"both"],
+"Catholic Community Services of Western Washington":[18,1,1,"both"],
+"City Fruit":[0,0,1,"once"],
+"City of Bellevue Volunteers":[12,0,1,"both"],
+"City of Kirkland Volunteers":[12,0,1,"both"],
+"City of Redmond Volunteers":[12,0,1,"both"],
+"City of Renton Volunteers":[12,0,1,"both"],
+"City of SeaTac Volunteer Program":[12,0,1,"both"],
+"College Success Foundation":[18,null,null,"once"],
+"Compass Housing Alliance":[16,0,1,"both"],
+"Community Lunch on Capitol Hill":[12,0,1,"both"],
+"Communities In Schools of Federal Way":[18,1,null,"ongoing"],
+"Communities In Schools of Greater King County":[18,1,null,"ongoing"],
+"Communities In Schools of South King County":[18,1,null,"ongoing"],
+"Crisis Connections":[18,1,null,"ongoing"],
+"DESC":[18,1,0,"ongoing"],
+"Duwamish Alive Coalition":[0,0,1,"once"],
+"Duwamish River Community Coalition":[0,0,1,"once"],
+"EarthCorps":[10,0,1,"once"],
+"El Centro de la Raza":[14,1,1,"both"],
+"Elizabeth Gregory Home":[18,1,0,"ongoing"],
+"East African Community Services":[16,1,1,"both"],
+"Eastside Friends of Seniors":[18,1,null,"ongoing"],
+"Evergreen Mountain Bike Alliance":[12,0,1,"once"],
+"EvergreenHealth Hospital Volunteers":[16,1,0,"ongoing"],
+"FareStart":[16,0,1,"both"],
+"FamilyWorks":[12,0,1,"both"],
+"Federal Way Community Gardens Foundation":[0,0,1,"once"],
+"Federal Way Day Center (Catholic Community Services)":[18,0,1,"both"],
+"Federal Way Senior Center & South King County Food Bank":[16,0,1,"both"],
+"Fred Hutchinson Cancer Center":[18,1,0,"ongoing"],
+"Food Lifeline":[12,0,1,"both"],
+"Friends of the Issaquah Salmon Hatchery":[0,0,1,"both"],
+"Friends of Youth":[18,1,1,"both"],
+"Full Life Care Care Teams":[18,1,0,"ongoing"],
+"FUSION Federal Way":[12,0,1,"both"],
+"Forterra / Green City Partnerships":[0,0,1,"once"],
+"Green Issaquah Partnership":[0,0,1,"once"],
+"Green Everett Partnership":[0,0,1,"once"],
+"Green Kirkland Partnership":[0,0,1,"once"],
+"Green Redmond Partnership":[0,0,1,"once"],
+"Green SeaTac Partnership":[0,0,1,"once"],
+"Green Seattle Partnership":[0,0,1,"once"],
+"Green Tukwila Partnership":[0,0,1,"once"],
+"Highline Area Food Bank":[12,0,1,"both"],
+"Highline Heritage Museum":[16,0,1,"both"],
+"Hopelink":[12,0,1,"both"],
+"Imagine Housing":[16,0,1,"both"],
+"International Rescue Committee (IRC) Seattle & SeaTac":[18,1,0,"ongoing"],
+"Issaquah Alps Trails Club":[0,0,1,"once"],
+"Issaquah Food & Clothing Bank":[12,0,1,"both"],
+"Jewish Family Service (Polack Food Bank)":[12,0,1,"both"],
+"Kent Food Bank and Emergency Services":[12,0,1,"both"],
+"Kent Parks Outdoor Conservation Events":[0,0,1,"once"],
+"Kent Youth and Family Services":[18,1,0,"both"],
+"KentHOPE Day Center for Women & Children":[16,1,1,"both"],
+"KidVantage (formerly Eastside Baby Corner)":[0,0,1,"both"],
+"Kindering":[16,1,0,"both"],
+"King Conservation District":[0,0,1,"once"],
+"Kirkland Arts Center":[16,0,0,"both"],
+"Kirkland Nourishing Network":[12,0,1,"once"],
+"Lake Washington Schools Foundation":[12,0,1,"both"],
+"LifeWire":[18,1,1,"both"],
+"Little Bit Therapeutic Riding Center":[14,1,0,"ongoing"],
+"Low Income Housing Institute (LIHI)":[14,0,1,"once"],
+"Mary's Place":[18,1,1,"both"],
+"Maltby Food Bank":[12,0,1,"both"],
+"MEOW Cat Rescue":[16,0,0,"ongoing"],
+"Mercer Island Thrift Shop (supporting MIYFS)":[14,0,1,"both"],
+"Mid Sound Fisheries Enhancement Group":[0,0,1,"once"],
+"Mountains to Sound Greenway Trust":[10,0,1,"both"],
+"Meals on Wheels King County":[18,1,0,"ongoing"],
+"Museum of Flight":[16,0,1,"both"],
+"Museum of Pop Culture (MoPOP)":[16,0,1,"both"],
+"NAMI Seattle":[18,null,null,"both"],
+"New Bethlehem Program (Catholic Community Services)":[12,0,1,"both"],
+"North Helpline":[12,0,1,"both"],
+"Northshore Senior Center":[18,0,1,"both"],
+"Northwest Folklife":[12,0,1,"both"],
+"Northwest Harvest":[12,0,1,"both"],
+"Operation Nightwatch":[12,0,1,"both"],
+"Orca Conservancy":[18,null,0,"both"],
+"Orca Network":[18,null,0,"both"],
+"Oxbow Farm & Conservation Center":[0,0,1,"once"],
+"PAWS (Progressive Animal Welfare Society)":[18,0,0,"both"],
+"Pacific Science Center":[14,0,1,"both"],
+"Page Ahead Children's Literacy Program":[16,0,1,"both"],
+"Pasado's Safe Haven":[18,0,1,"both"],
+"Pike Market Senior Center & Food Bank":[14,0,1,"both"],
+"Plymouth Housing":[18,1,1,"both"],
+"Project Feast":[16,0,1,"both"],
+"Puget Soundkeeper Alliance":[0,0,1,"once"],
+"Queen Anne Food Bank":[12,0,1,"both"],
+"RASKC – Regional Animal Services of King County":[18,0,0,"both"],
+"Rainier Valley Food Bank":[12,0,1,"both"],
+"Reading Partners Seattle":[18,1,null,"ongoing"],
+"REACH Renton (Center of Hope Family Shelter)":[12,0,1,"both"],
+"Recovery Café":[18,1,0,"ongoing"],
+"Redmond Food Box Program":[12,0,1,"both"],
+"Refugee Women's Alliance (ReWA)":[18,1,0,"both"],
+"Renton Historical Society (Renton History Museum)":[16,0,1,"both"],
+"Renewal Food Bank":[0,0,1,"both"],
+"ROOTS Young Adult Shelter":[18,1,0,"ongoing"],
+"Salvation Army Renton Corps (Renton Rotary Food Bank)":[14,0,1,"both"],
+"SHADOW Lake Nature Preserve":[0,0,1,"once"],
+"Snoqualmie Valley Food Bank":[12,0,1,"both"],
+"Salvation Army Seattle Social Services":[14,0,1,"both"],
+"Seattle Aquarium":[16,1,0,"ongoing"],
+"Seattle Art Museum":[18,0,0,"both"],
+"Seattle Animal Shelter":[18,0,0,"both"],
+"Seattle Humane":[18,0,1,"both"],
+"Seattle Public Schools Volunteer Program":[18,1,null,"ongoing"],
+"Seattle ReCreative":[14,0,1,"both"],
+"Sierra Club Washington State Chapter":[18,null,1,"ongoing"],
+"Solid Ground":[16,1,1,"both"],
+"Sound Generations":[18,1,0,"ongoing"],
+"Sound Salmon Solutions (Stilly-Snohomish Fisheries Task Force)":[0,0,1,"once"],
+"Sophia Way":[18,1,1,"both"],
+"Sustainable Renton":[0,0,1,"once"],
+"Sno-Valley Senior Center":[14,0,1,"both"],
+"Swedish Medical Center (First Hill)":[18,1,0,"ongoing"],
+"Tilth Alliance":[0,0,1,"once"],
+"Treehouse":[14,0,1,"both"],
+"Teen Feed":[12,0,1,"both"],
+"Tukwila Pantry":[12,0,1,"both"],
+"Union Gospel Mission":[12,0,1,"both"],
+"University District Food Bank":[12,0,1,"both"],
+"UW Medicine Volunteer Program":[18,1,0,"ongoing"],
+"Washington Trails Association":[10,0,1,"once"],
+"Wellspring Family Services":[16,1,1,"both"],
+"West Seattle Food Bank":[12,0,1,"both"],
+"WestSide Baby":[12,0,1,"both"],
+"Whale Scout":[0,0,1,"once"],
+"White Center Food Bank":[12,0,1,"both"],
+"Woodland Park Zoo":[18,1,0,"ongoing"],
+"World Relief Western Washington":[18,1,0,"ongoing"],
+"YMCA of Greater Seattle":[16,1,1,"both"],
+"YMCA of Snohomish County":[16,1,1,"both"],
+"YWCA Seattle–King–Snohomish":[16,1,1,"both"],
+"YouthCare":[18,1,1,"both"],
+"Zero Waste Washington":[16,null,0,"both"],
+"Athletes for Kids":[15,1,null,"ongoing"],
+"American Cancer Society Discovery Shop (West Seattle)":[16,0,1,"both"],
+"Des Moines Area Food Bank":[12,0,1,"both"],
+"Henry Art Gallery":[18,null,0,"once"],
+"HealthPoint":[18,1,0,"both"],
+"Kandelia":[18,1,0,"ongoing"],
+"KidsQuest Children's Museum":[14,0,1,"both"],
+"Nepal Seattle Society":[12,0,1,"once"],
+"New Horizons":[16,0,1,"both"],
+"Overlake Medical Center & Clinics":[16,1,0,"ongoing"],
+"Peter Kirk Community Center Senior Lunch Program":[18,0,0,"both"],
+"Southwest Youth & Family Services":[16,1,1,"both"],
+"Asian Counseling and Referral Service (ACRS)":[16,0,1,"both"],
+"Chinese Information and Service Center (CISC)":[16,1,1,"both"],
+"InterIm CDA / Danny Woo Community Garden":[0,0,1,"once"],
+"API Chaya":[18,1,0,"ongoing"],
+"Wing Luke Museum":[16,1,0,"both"],
+"Kin On Health Center":[14,1,1,"both"],
+"Japanese Cultural & Community Center of Washington":[12,0,1,"both"],
+"Filipino Community of Seattle":[12,0,1,"both"],
+"Helping Link/Một Dấu Nối":[18,1,0,"ongoing"],
+"United Indians of All Tribes Foundation":[12,0,1,"both"],
+"Chief Seattle Club":[null,null,null,null],
+"Sea Mar Community Health Centers":[18,1,0,"both"],
+"Horn of Africa Services":[15,1,1,"both"],
+"Urban League of Metropolitan Seattle":[18,1,1,"both"],
+"Lambert House LGBTQ Youth Center":[23,1,0,"ongoing"],
+"Latino Educational Training Institute (LETI)":[18,0,1,"both"]
+};
+const CITYXY={
+seattle:[47.598,-122.332],bellevue:[47.615,-122.192],kirkland:[47.679,-122.192],
+redmond:[47.672,-122.118],woodinville:[47.753,-122.122],bothell:[47.762,-122.205],
+mercerisland:[47.589,-122.222],sammamish:[47.617,-122.035],issaquah:[47.531,-122.028],
+duvall:[47.748,-121.940],northbend:[47.492,-121.789],renton:[47.483,-122.208],
+tukwila:[47.462,-122.259],kent:[47.381,-122.232],auburn:[47.308,-122.229],
+burien:[47.468,-122.345],seatac:[47.448,-122.298],desmoines:[47.400,-122.322],
+federalway:[47.301,-122.313],everett:[47.918,-122.303],lynnwood:[47.821,-122.292],
+sultan:[47.859,-121.884],whidbey:[47.978,-122.537]
+};
 </script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function(){
 "use strict";
@@ -415,9 +634,20 @@ function chipRow(){
   Object.keys(CAUSES).forEach(function(k){html+='<button class="chip" data-c="'+k+'"><span class="dot" style="background:'+CAUSES[k][1]+'"></span>'+CAUSES[k][0]+"</button>";});
   chips.innerHTML=html;
 }
+function factPills(o){
+  var a=ATTRS[o.n];if(!a)return"";
+  var out=[];
+  if(a[0]===0)out.push("All ages");else if(a[0])out.push(a[0]+"+");
+  if(a[1])out.push("Background check");
+  if(a[2])out.push("Groups welcome");
+  if(a[3]==="once")out.push("One-time friendly");
+  else if(a[3]==="ongoing")out.push("Regular commitment");
+  else if(a[3]==="both")out.push("Flexible schedule");
+  return out.length?'<div class="facts">'+out.map(function(f){return '<span class="fact">'+f+"</span>";}).join("")+"</div>":"";
+}
 function cardHTML(o){
   var badges=o.c.map(function(k){return pill(CAUSES[k][0],CAUSES[k][1]);}).join("")+'<span class="pill loc">'+LOCS[o.l][0]+"</span>";
-  return '<article class="card"><h2>'+o.n+'</h2><p>'+o.d+'</p><div class="badges">'+badges+'</div><a class="go" href="'+o.u+'" target="_blank" rel="noopener noreferrer">Volunteer \u2192</a></article>';
+  return '<article class="card"><h2>'+o.n+'</h2><p>'+o.d+'</p><div class="badges">'+badges+'</div>'+factPills(o)+'<a class="go" href="'+o.u+'" target="_blank" rel="noopener noreferrer">Volunteer \u2192</a></article>';
 }
 function apply(){
   var term=q.value.trim().toLowerCase(),html="",sorted=ORGS.slice().sort(function(a,b){return a.n.localeCompare(b.n);});
@@ -431,6 +661,7 @@ function apply(){
   grid.innerHTML=html;
   empty.style.display=lastFiltered.length?"none":"block";
   count.textContent=lastFiltered.length+" of "+ORGS.length+" organizations";
+  drawMarkers();
 }
 chips.addEventListener("click",function(e){
   var b=e.target.closest(".chip");if(!b)return;
@@ -447,10 +678,48 @@ clearBtn.addEventListener("click",function(){
 });
 surpriseBtn.addEventListener("click",function(){
   if(!lastFiltered.length)return;
+  if(activeView!=="list")setView("list");
   var pick=lastFiltered[Math.floor(Math.random()*lastFiltered.length)];
   var idx=lastFiltered.indexOf(pick),card=grid.children[idx];
   if(card){card.scrollIntoView({behavior:"smooth",block:"center"});card.classList.remove("flash");void card.offsetWidth;card.classList.add("flash");}
 });
+var activeView="list",map=null,markerLayer=null;
+function hashName(s){var h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return h;}
+function orgXY(o){
+  var c=CITYXY[o.l];if(!c)return null;
+  var h=hashName(o.n);
+  return [c[0]+(((h%17)-8)*0.0022),c[1]+((((h>>5)%17)-8)*0.003)];
+}
+function drawMarkers(){
+  if(!map||activeView!=="map")return;
+  markerLayer.clearLayers();
+  var shown=0;
+  lastFiltered.forEach(function(o){
+    var xy=orgXY(o);if(!xy)return;shown++;
+    markerLayer.addLayer(L.circleMarker(xy,{radius:7,color:"#20694f",weight:2,fillColor:"#ff6f54",fillOpacity:.9})
+      .bindPopup('<b>'+o.n+'</b><br><small>'+LOCS[o.l][0]+'</small><br>'+o.d+'<br><a href="'+o.u+'" target="_blank" rel="noopener noreferrer">Volunteer page \u2192</a>'));
+  });
+  document.getElementById("mapnote").textContent="Showing "+shown+" place-based organizations — region-wide programs aren't pinned. Pins show the general area; check each organization's page for the exact address.";
+}
+function initViewMap(){
+  map=L.map("map",{scrollWheelZoom:true}).setView([47.55,-122.28],9);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+  markerLayer=L.layerGroup().addTo(map);
+  drawMarkers();
+}
+function setView(v){
+  activeView=v;
+  document.getElementById("listview").style.display=(v==="list")?"":"none";
+  document.getElementById("mapbox").style.display=(v==="map")?"":"none";
+  document.getElementById("vlist").classList.toggle("active",v==="list");
+  document.getElementById("vmap").classList.toggle("active",v==="map");
+  if(v==="map"){
+    if(!map)initViewMap();else{setTimeout(function(){map.invalidateSize();drawMarkers();},60);}
+  }
+  window.scrollTo({top:0});
+}
+document.getElementById("vlist").addEventListener("click",function(){setView("list");});
+document.getElementById("vmap").addEventListener("click",function(){setView("map");});
 var activeCause="",activeLoc="";
 (function init(){
   locOptions();chipRow();
