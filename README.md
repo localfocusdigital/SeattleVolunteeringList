@@ -2,7 +2,15 @@
 
 A static directory of **180+ nonprofits and community organizations** across the greater Seattle / Puget Sound region that accept volunteers — covering Seattle, Bellevue, Kirkland, Redmond, Woodinville, Bothell, Renton, Tukwila, Kent, Auburn, Burien, SeaTac, Des Moines, Federal Way, Issaquah, Sammamish, Mercer Island, the Snoqualmie Valley, and Snohomish County.
 
-Features: search, filter by cause (11 categories including **Culture & Heritage** — CISC, ACRS, InterIm CDA, Wing Luke, United Indians/Daybreak Star, Horn of Africa Services, Urban League and more), filter by city/area, a "Surprise me" random pick, and every listing links directly to that organization's live volunteer page so details stay current.
+Features: search, filter by cause (11 categories including **Culture & Heritage**), filter by city/area, **map view** (Leaflet/OpenStreetMap), requirement chips on every card (min age, background check, groups, commitment type), a "Surprise me" random pick, and every listing links directly to that organization's live volunteer page.
+
+**SEO landing pages** (`<slug>/index.html`, 18 of them) target seasonal, activity, audience and city searches — e.g. Thanksgiving volunteering, hospital programs, corporate team events, teen service hours, Eastside/South-King-County guides. They are generated from the live directory data by:
+
+```bash
+node build-pages.js
+```
+
+Run this after any change to `ORGS` in index.html — it regenerates all subpages and `sitemap.xml` (robots.txt is static).
 
 ## Deploy to GitHub Pages
 
