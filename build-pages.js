@@ -1,7 +1,7 @@
 "use strict";
 const fs=require("fs");
 const path=require("path");
-const BASE="https://localfocusdigital.github.io/SeattleVolunteeringList/";
+const BASE="https://seattlevolunteerlist.com/";
 let html=fs.readFileSync("index.html","utf8");
 const firstScriptStart=html.indexOf("<script>")+8;
 const firstScriptEnd=html.indexOf("</script>");

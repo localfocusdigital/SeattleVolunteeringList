@@ -53,3 +53,7 @@ Commit and push — GitHub Pages updates automatically.
 
 Listings were last verified August 2026. Volunteer programs change schedules frequently; each card links to the source of truth so visitors always see current openings.
 
+
+## Custom domain
+
+Live at https://seattlevolunteerlist.com (DNS managed on Cloudflare; apex A records point to GitHub Pages IPs, www CNAMEs to localfocusdigital.github.io).
