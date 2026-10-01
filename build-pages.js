@@ -3,13 +3,16 @@ const fs=require("fs");
 const path=require("path");
 const BASE="https://seattlevolunteerlist.com/";
 let html=fs.readFileSync("index.html","utf8");
-const firstScriptStart=html.indexOf("<script>")+8;
-const firstScriptEnd=html.indexOf("</script>");
-const dataJs=html.slice(firstScriptStart,firstScriptEnd);
+const dataJs=fs.readFileSync(path.join("assets","data.js"),"utf8");
 const {CAUSES,LOCS,ORGS,ATTRS}=new Function(dataJs+";return {CAUSES,LOCS,ORGS,ATTRS};")();
 const css=html.slice(html.indexOf("<style>")+7,html.indexOf("</style>"));
 const ORG_SET=new Set(ORGS.map(o=>o.n));
-function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function safeUrl(u){const x=new URL(u);if(x.protocol!=="https:"&&x.protocol!=="http:")throw new Error("Bad URL scheme: "+u);return esc(x.href);}
+function safeColor(c){if(!/^#[0-9a-fA-F]{6}$/.test(c))throw new Error("Bad color: "+c);return c;}
+// Static pages run no scripts, so their policy blocks scripts entirely.
+const CSP="default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests";
+const SEC_META='<meta http-equiv="Content-Security-Policy" content="'+CSP+'">\n<meta name="referrer" content="strict-origin-when-cross-origin">\n';
 function attrsOf(n){return ATTRS[n]||null;}
 function factPills(o){
   const a=attrsOf(o.n);if(!a)return"";
@@ -23,10 +26,10 @@ function factPills(o){
   return out.length?'<div class="facts">'+out.map(f=>'<span class="fact">'+f+"</span>").join("")+"</div>":"";
 }
 function cardHTML(o){
-  const badges=o.c.map(k=>pill(CAUSES[k][0],CAUSES[k][1])).join("")+'<span class="pill loc">'+LOCS[o.l][0]+"</span>";
-  return '<article class="card"><h2>'+o.n+'</h2><p>'+o.d+'</p><div class="badges">'+badges+'</div>'+factPills(o)+'<a class="go" href="'+o.u+'" target="_blank" rel="noopener noreferrer">Volunteer \u2192</a></article>';
+  const badges=o.c.map(k=>pill(CAUSES[k][0],CAUSES[k][1])).join("")+'<span class="pill loc">'+esc(LOCS[o.l][0])+"</span>";
+  return '<article class="card"><h2>'+esc(o.n)+'</h2><p>'+esc(o.d)+'</p><div class="badges">'+badges+'</div>'+factPills(o)+'<a class="go" href="'+safeUrl(o.u)+'" target="_blank" rel="noopener noreferrer">Volunteer \u2192</a></article>';
 }
-function pill(text,color){return '<span class="pill" style="background:'+color+'1c;color:'+color+'">'+text+"</span>";}
+function pill(text,color){color=safeColor(color);return '<span class="pill" style="background:'+color+'1c;color:'+color+'">'+esc(text)+"</span>";}
 const EASTSIDE=["bellevue","kirkland","redmond","woodinville","bothell","mercerisland","sammamish","issaquah"];
 const SOUTHKC=["renton","tukwila","kent","auburn","burien","seatac","desmoines","federalway"];
 const NAMES=(list)=>{const bad=list.filter(n=>!ORG_SET.has(n));if(bad.length)throw new Error("Unknown org names: "+bad.join(" | "));return list;};
@@ -124,9 +127,9 @@ html=html.replace(/<section class="wrap guides">[\s\S]*?<\/section>\s*/g,"");
 if(!html.includes("og:type"))html=html.replace("</title>","</title>\n"+'<meta property="og:type" content="website">\n<meta property="og:url" content="'+BASE+'">\n<meta property="og:title" content="Volunteer Puget Sound">\n<meta property="og:description" content="187 nonprofits across Seattle, the Eastside, South King County and Snohomish County that need volunteers — searchable by cause and city.">\n<meta name="twitter:card" content="summary">');
 fs.writeFileSync("index.html",html);
 function pageHTML(p){
-  return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>'+p.title+"</title>\n"+
-'<meta name="description" content="'+p.desc+'">\n<link rel="canonical" href="'+BASE+p.slug+'/">\n'+
-'<meta property="og:type" content="article">\n<meta property="og:url" content="'+BASE+p.slug+'/">\n<meta property="og:title" content="'+p.title+'">\n<meta property="og:description" content="'+p.desc+'">\n<meta name="twitter:card" content="summary">\n'+
+  return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>'+esc(p.title)+"</title>\n"+SEC_META+
+'<meta name="description" content="'+esc(p.desc)+'">\n<link rel="canonical" href="'+BASE+p.slug+'/">\n'+
+'<meta property="og:type" content="article">\n<meta property="og:url" content="'+BASE+p.slug+'/">\n<meta property="og:title" content="'+esc(p.title)+'">\n<meta property="og:description" content="'+esc(p.desc)+'">\n<meta name="twitter:card" content="summary">\n'+
 '<link rel="icon" href="data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'.9em\' font-size=\'90\'>🌲</text></svg>">\n'+
 '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'+
 '<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">\n'+
@@ -147,8 +150,8 @@ PAGES.forEach(p=>{
 });
 const urls=[BASE,BASE+"blog/",...PAGES.map(p=>BASE+p.slug+"/")];
 const BLOG_CSS="h1{font-family:Fraunces,Georgia,serif;font-size:clamp(1.9rem,4.5vw,2.8rem);font-weight:700;color:var(--ink);margin-bottom:10px}\n.pagehead{background:linear-gradient(180deg,var(--sky1),var(--sky2));padding:44px 0 34px;border-bottom:1px solid var(--line)}\n.topbar{background:var(--cream);border-bottom:1px solid var(--line);padding:14px 0}\n.topbar a.brand{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:1.15rem;color:var(--ink);text-decoration:none}\n.topbar a.cta-link{float:right;font-size:.88rem;font-weight:800;color:var(--green)}\n.bcard{background:#fff;border:1.5px solid #eadfce;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:8px;transition:transform .15s,box-shadow .15s}\n.bcard:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(23,51,74,.1)}\n.bcard h2{font-family:Fraunces,Georgia,serif;font-size:1.08rem;line-height:1.4}\n.bcard h2 a{color:#17334a;text-decoration:none}\n.bcard h2 a:hover{color:#20694f}\n.bcard p{font-size:.86rem;color:#5a7086;flex:1}\n.bcard span{font-size:.78rem;font-weight:800;color:#20694f}";
-const blogBody='<div class="grid">'+PAGES.map(p=>'<div class="bcard"><h2><a href="../'+p.slug+'/">'+p.title+"</a></h2><p>"+p.desc+"</p><span>Read the guide \u2192</span></div>").join("")+"</div>";
-const blogHTML='<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Guides & Stories \u2014 The Seattle Volunteer List</title>\n<meta name="description" content="Practical guides to volunteering around Seattle \u2014 seasonal pushes, cause deep-dives, teen service hours, corporate outings and more.">\n<link rel="canonical" href="'+BASE+'blog/">\n<link rel="icon" href="data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'.9em\' font-size=\'90\'>\u{1F332}</text></svg>">\n<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">\n<style>'+css+"\n"+BLOG_CSS+"</style>\n</head>\n<body>\n"+
+const blogBody='<div class="grid">'+PAGES.map(p=>'<div class="bcard"><h2><a href="../'+p.slug+'/">'+esc(p.title)+"</a></h2><p>"+esc(p.desc)+"</p><span>Read the guide \u2192</span></div>").join("")+"</div>";
+const blogHTML='<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Guides & Stories \u2014 The Seattle Volunteer List</title>\n'+SEC_META+'<meta name="description" content="Practical guides to volunteering around Seattle \u2014 seasonal pushes, cause deep-dives, teen service hours, corporate outings and more.">\n<link rel="canonical" href="'+BASE+'blog/">\n<link rel="icon" href="data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'.9em\' font-size=\'90\'>\u{1F332}</text></svg>">\n<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">\n<style>'+css+"\n"+BLOG_CSS+"</style>\n</head>\n<body>\n"+
 '<div class="topbar"><div class="wrap"><a class="brand" href="'+BASE+'">\u{1F332} The Seattle Volunteer List</a><a class="cta-link" href="'+BASE+'">Full directory \u2192</a></div></div>\n'+
 '<header class="pagehead"><div class="wrap"><h1>Guides & Stories</h1><p style="color:#38566e;font-weight:600;max-width:680px">Practical deep-dives on where, when and how to volunteer around Puget Sound \u2014 written from our directory of '+ORGS.length+" verified organizations.</p></div></header>\n"+
 '<main class="wrap" style="padding-top:28px">'+blogBody+'</main>\n'+
