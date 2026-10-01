@@ -102,7 +102,7 @@ function initViewMap(){
 function setView(v){
   activeView=v;
   document.getElementById("listview").style.display=(v==="list")?"":"none";
-  document.getElementById("mapbox").style.display=(v==="map")?"":"none";
+  document.getElementById("mapbox").style.display=(v==="map")?"block":"none";
   document.getElementById("vlist").classList.toggle("active",v==="list");
   document.getElementById("vmap").classList.toggle("active",v==="map");
   if(v==="map"){
